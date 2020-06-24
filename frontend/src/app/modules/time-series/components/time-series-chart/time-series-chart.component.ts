@@ -14,7 +14,8 @@ import {EventResultData} from '../../models/event-result-data.model';
 import {LineChartService} from '../../services/line-chart.service';
 import {NgxSmartModalService} from 'ngx-smart-modal';
 import {SpinnerService} from '../../../shared/services/spinner.service';
-import {TranslateService} from '@ngx-translate/core';
+import {ActivatedRoute, Params} from '@angular/router';
+import {ResultSelectionStore} from '../../../result-selection/services/result-selection.store';
 
 
 @Component({
@@ -33,8 +34,6 @@ export class TimeSeriesChartComponent implements AfterContentInit, OnChanges {
   @ViewChild('svg')
   svgElement: ElementRef;
 
-  public ngxSmartModalService;
-
   dataTrimLabels: { [key: string]: string } = {};
   dataTrimInputRange: { [key: string]: { [key: string]: number } } = {min: {}, max: {}};
   dataTrimInputStep: { [key: string]: number } = {};
@@ -46,12 +45,13 @@ export class TimeSeriesChartComponent implements AfterContentInit, OnChanges {
 
   constructor(private lineChartService: LineChartService,
               private spinnerService: SpinnerService,
-              private translateService: TranslateService,
-              ngxSmartModalService: NgxSmartModalService) {
-    this.ngxSmartModalService = ngxSmartModalService;
+              private resultSelectionStore: ResultSelectionStore,
+              private ngxSmartModalService: NgxSmartModalService,
+              private route: ActivatedRoute) {
   }
 
   ngAfterContentInit(): void {
+    this.readAdditionalQueryParams();
     this.lineChartService.initChart(this.svgElement, () => this.handlePointSelectionError());
   }
 
@@ -88,6 +88,7 @@ export class TimeSeriesChartComponent implements AfterContentInit, OnChanges {
       return;
     }
 
+    this.writeQueryWithAdditionalParams();
     const timeSeries = this.lineChartService.prepareData(this.timeSeriesResults, this.selectedTrimValues);
     this.lineChartService.prepareLegend(this.timeSeriesResults);
     this.lineChartService.drawLineChart(timeSeries, this.timeSeriesResults.measurandGroups,
@@ -102,16 +103,13 @@ export class TimeSeriesChartComponent implements AfterContentInit, OnChanges {
       return;
     }
 
+    this.writeQueryWithAdditionalParams();
     const timeSeries = this.lineChartService.prepareData(this.timeSeriesResults, this.selectedTrimValues);
     this.lineChartService.drawLineChart(timeSeries, this.timeSeriesResults.measurandGroups,
       this.timeSeriesResults.summaryLabels, this.timeSeriesResults.numberOfTimeSeries, this.selectedTrimValues);
     this.lineChartService.restoreZoom(timeSeries, this.selectedTrimValues);
 
     this.spinnerService.hideSpinner('time-series-line-chart-spinner');
-  }
-
-  handlePointSelectionError(): void {
-    this.ngxSmartModalService.open('pointSelectionErrorModal');
   }
 
   adjustInputByEvent(event, selectedInput: string, otherInput: string, measurandGroup: string): void {
@@ -149,6 +147,50 @@ export class TimeSeriesChartComponent implements AfterContentInit, OnChanges {
         previousSelectedMax !== this.selectedTrimValues.max[measurandGroup]) {
       this.redrawWithRestoredZoomAndLegendSelection();
     }
+  }
+
+  closePointSelectionErrorModal(): void {
+    this.ngxSmartModalService.close('pointSelectionErrorModal');
+  }
+
+  private handlePointSelectionError(): void {
+    this.ngxSmartModalService.open('pointSelectionErrorModal');
+  }
+
+  private readAdditionalQueryParams(): void {
+    this.route.queryParams.subscribe((params: Params) => {
+      this.selectedTrimValues.min['LOAD_TIMES'] = params.minLoadTimes ?
+        params.minLoadTimes : this.selectedTrimValues.min['LOAD_TIMES'];
+      this.selectedTrimValues.max['LOAD_TIMES'] = params.maxLoadTimes ?
+        params.maxLoadTimes : this.selectedTrimValues.max['LOAD_TIMES'];
+      this.selectedTrimValues.min['PERCENTAGES'] = params.minPercentages ?
+        params.minPercentages : this.selectedTrimValues.min['PERCENTAGES'];
+      this.selectedTrimValues.max['PERCENTAGES'] = params.maxPercentages ?
+        params.maxPercentages : this.selectedTrimValues.max['PERCENTAGES'];
+      this.selectedTrimValues.min['REQUEST_COUNTS'] = params.minRequestCounts ?
+        params.minRequestCounts : this.selectedTrimValues.min['REQUEST_COUNTS'];
+      this.selectedTrimValues.max['REQUEST_COUNTS'] = params.maxRequestCounts ?
+        params.maxRequestCounts : this.selectedTrimValues.max['REQUEST_COUNTS'];
+      this.selectedTrimValues.min['REQUEST_SIZES'] = params.minRequestSizes ?
+        params.minRequestSizes : this.selectedTrimValues.min['REQUEST_SIZES'];
+      this.selectedTrimValues.max['REQUEST_SIZES'] = params.maxRequestSizes ?
+        params.maxRequestSizes : this.selectedTrimValues.max['REQUEST_SIZES'];
+    });
+  }
+
+  private writeQueryWithAdditionalParams(): void {
+    const additionalParams: Params = {
+      minLoadTimes: this.selectedTrimValues.min['LOAD_TIMES'] ? this.selectedTrimValues.min['LOAD_TIMES'] : null,
+      maxLoadTimes: this.selectedTrimValues.max['LOAD_TIMES'] ? this.selectedTrimValues.max['LOAD_TIMES'] : null,
+      minPercentages: this.selectedTrimValues.min['PERCENTAGES'] ? this.selectedTrimValues.min['PERCENTAGES'] : null,
+      maxPercentages: this.selectedTrimValues.max['PERCENTAGES'] ? this.selectedTrimValues.max['PERCENTAGES'] : null,
+      minRequestCounts: this.selectedTrimValues.min['REQUEST_COUNTS'] ? this.selectedTrimValues.min['REQUEST_COUNTS'] : null,
+      maxRequestCounts: this.selectedTrimValues.max['REQUEST_COUNTS'] ? this.selectedTrimValues.max['REQUEST_COUNTS'] : null,
+      minRequestSizes: this.selectedTrimValues.min['REQUEST_SIZES'] ? this.selectedTrimValues.min['REQUEST_SIZES'] : null,
+      maxRequestSizes: this.selectedTrimValues.max['REQUEST_SIZES'] ? this.selectedTrimValues.max['REQUEST_SIZES'] : null,
+    };
+
+    this.resultSelectionStore.writeQueryParams(additionalParams);
   }
 
   private setDataTrimSettings(): void {

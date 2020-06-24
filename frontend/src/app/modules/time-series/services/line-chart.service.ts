@@ -37,8 +37,8 @@ export class LineChartService {
   // D3 margin conventions
   // > With this convention, all subsequent code can ignore margins.
   // see: https://bl.ocks.org/mbostock/3019563
-  private MARGIN: { [key: string]: number } = {top: 60, right: 60, bottom: 40, left: 75};
-  private Y_AXIS_WIDTH = 65;
+  private readonly MARGIN: { [key: string]: number } = {top: 60, right: 60, bottom: 40, left: 75};
+  private readonly Y_AXIS_WIDTH = 65;
 
   private _margin: { [key: string]: number } = {
     top: this.MARGIN.top,
@@ -51,6 +51,9 @@ export class LineChartService {
   private _legendGroupTop: number = this._margin.top + this._height + 50;
   private _xScale: D3ScaleTime<number, number>;
 
+  private _dataTrimLabels: { [key: string]: string } = {};
+  private _dataMaxValues: { [key: string]: number } = {};
+
   constructor(private translationService: TranslateService,
               private urlBuilderService: UrlBuilderService,
               private lineChartScaleService: LineChartScaleService,
@@ -59,13 +62,9 @@ export class LineChartService {
               private lineChartLegendService: LineChartLegendService) {
   }
 
-  private _dataTrimLabels: { [key: string]: string } = {};
-
   get dataTrimLabels(): { [p: string]: string } {
     return this._dataTrimLabels;
   }
-
-  private _dataMaxValues: { [key: string]: number } = {};
 
   get dataMaxValues(): { [p: string]: number } {
     return this._dataMaxValues;

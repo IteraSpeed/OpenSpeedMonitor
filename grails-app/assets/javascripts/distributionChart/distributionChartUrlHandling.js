@@ -35,7 +35,7 @@ OpenSpeedMonitor.ChartModules.UrlHandling.DistributionChart = (function () {
             });
             measurands.push(json);
         });
-        map['measurand'] = measurands
+        map['measurand'] = encodeURIComponent(measurands);
     };
     var addHandler = function () {
         $('#graphButtonHtmlId').on('click', updateUrl);

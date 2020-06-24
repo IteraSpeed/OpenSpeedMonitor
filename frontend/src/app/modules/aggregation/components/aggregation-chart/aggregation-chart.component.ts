@@ -17,9 +17,10 @@ import {AggregationChartDataByMeasurand} from '../../models/aggregation-chart-da
 export class AggregationChartComponent implements OnChanges {
 
   @ViewChild('svg') svgElement: ElementRef;
-  @Input() barchartAverageData = [];
-  @Input() barchartMedianData = [];
+  @Input() barchartAverageData = {};
+  @Input() barchartMedianData = {};
 
+  filterRules = {};
   hasFilterRules = false;
   showDiagramTypeSwitch = false;
 
@@ -40,7 +41,6 @@ export class AggregationChartComponent implements OnChanges {
 
   private dataForScoreBar: { min: number, max: number, barsToRender: Array<any> };
   private measurandDataMap: AggregationChartDataByMeasurand = {};
-  private filterRules = {};
   private dataForHeader = '';
   private sideLabels: string[] = [];
   private anyHighlighted = false;
@@ -59,28 +59,28 @@ export class AggregationChartComponent implements OnChanges {
 
   selectDiagramType(diagramType: string) {
     this.aggregationChartDataService.stackBars = (diagramType === 'stacked');
-    this.aggregationChartDataService.writeAdditionalQueryParams();
+    this.aggregationChartDataService.writeQueryWithAdditionalParams();
     this.redraw();
   }
 
   selectAggregationType(aggregationType: string): void {
     this.aggregationChartDataService.aggregationType = aggregationType;
-    this.aggregationChartDataService.writeAdditionalQueryParams();
+    this.aggregationChartDataService.writeQueryWithAdditionalParams();
     this.redraw();
   }
 
   selectFilter(filter: string): void {
-    this.aggregationChartDataService.selectedFilter = filter;
-    this.aggregationChartDataService.writeAdditionalQueryParams();
+    this.aggregationChartDataService.filter = filter;
+    this.aggregationChartDataService.writeQueryWithAdditionalParams();
     this.redraw();
   }
 
   redraw(): void {
-    if (Object.keys(this.barchartAverageData).length < 1) {
+    if (Object.keys(this.barchartAverageData).length < 1 || Object.keys(this.barchartMedianData).length < 1) {
       return;
-    } else if (Object.keys(this.barchartMedianData).length === 0) {
+    } else if (this.barchartMedianData.hasOwnProperty('series') && this.barchartMedianData['series'].length === 0) {
       this.aggregationChartDataService.aggregationType = 'avg';
-      this.aggregationChartDataService.writeAdditionalQueryParams();
+      this.aggregationChartDataService.writeQueryWithAdditionalParams();
     }
 
     this.aggregationChartDataService.setData();
@@ -140,7 +140,7 @@ export class AggregationChartComponent implements OnChanges {
   }
 
   enoughPercentileValues(): boolean {
-    return Object.keys(this.barchartMedianData).length >= 1;
+    return this.barchartMedianData.hasOwnProperty('series') && this.barchartMedianData['series'].length > 0;
   }
 
   private render(): void {

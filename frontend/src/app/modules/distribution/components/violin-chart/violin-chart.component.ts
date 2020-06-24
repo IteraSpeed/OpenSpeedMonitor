@@ -9,6 +9,8 @@ import {SpinnerService} from '../../../shared/services/spinner.service';
 import {DistributionDTO} from '../../models/distribution.model';
 import {CurveFactory} from 'd3-shape';
 import {TranslateService} from '@ngx-translate/core';
+import {ResultSelectionStore} from '../../../result-selection/services/result-selection.store';
+import {ActivatedRoute, Params} from '@angular/router';
 
 @Component({
   selector: 'osm-violin-chart',
@@ -43,7 +45,11 @@ export class ViolinChartComponent implements OnChanges {
   constructor(private measurandColorProviderService: MeasurandColorService,
               private violinChartMathService: ViolinChartMathService,
               private spinnerService: SpinnerService,
-              private translationService: TranslateService) {
+              private translationService: TranslateService,
+              private resultSelectionStore: ResultSelectionStore,
+              private route: ActivatedRoute
+  ) {
+    this.readChartSettingsByUrl();
   }
 
   @HostListener('window:resize')
@@ -75,12 +81,18 @@ export class ViolinChartComponent implements OnChanges {
     this.spinnerService.hideSpinner('violin-chart-spinner');
   }
 
+  setDataTrimValue(): void {
+    this.writeQueryWithAdditionalParams();
+    this.drawChart();
+  }
+
   setSortingRule(sortingRule: string): void {
     if (sortingRule !== 'desc' && sortingRule !== 'asc') {
       return;
     }
     this.selectedSortingRule = sortingRule;
     this.selectedFilterRule = '';
+    this.writeQueryWithAdditionalParams();
     this.drawChart();
   }
 
@@ -90,11 +102,36 @@ export class ViolinChartComponent implements OnChanges {
     }
     this.selectedFilterRule = filterRule;
     this.selectedSortingRule = '';
+    this.writeQueryWithAdditionalParams();
     this.drawChart();
+  }
+
+  writeQueryWithAdditionalParams(): void {
+    const additionalParams: Params = {
+      sortingRule: this.selectedSortingRule !== '' ? this.selectedSortingRule : null,
+      filterRule: this.selectedFilterRule !== '' ? this.selectedFilterRule : null,
+      maxValue: this.dataTrimValue
+    };
+
+    this.resultSelectionStore.writeQueryParams(additionalParams);
   }
 
   hasFilterRules(): boolean {
     return Object.keys(this.filterRules).length > 0;
+  }
+
+  private readChartSettingsByUrl(): void {
+    this.route.queryParams.subscribe((params: Params) => {
+      this.selectedSortingRule = params.sortingRule ? params.sortingRule : '';
+      this.selectedFilterRule = params.filterRule ? params.filterRule : '';
+      this.dataTrimValue = params.maxValue ? params.maxValue : this.dataTrimValue;
+
+      if (this.selectedSortingRule === '' && this.selectedFilterRule === '') {
+        this.selectedSortingRule = 'desc';
+      } else if (this.selectedSortingRule !== '' && this.selectedFilterRule !== '') {
+        this.selectedSortingRule = '';
+      }
+    });
   }
 
   private prepareChartData(inputData: DistributionDataDTO): DistributionDataDTO {
@@ -136,7 +173,7 @@ export class ViolinChartComponent implements OnChanges {
   }
 
   private sortSeries(): DistributionDTO[] {
-    if ((this.selectedSortingRule === 'desc' || this.selectedSortingRule === 'asc') && this.selectedFilterRule.length === 0) {
+    if ((this.selectedSortingRule === 'desc' || this.selectedSortingRule === 'asc') && this.selectedFilterRule === '') {
       return this.chartData.sortingRules[this.selectedSortingRule].map(trace => {
         return this.chartData.series[trace];
       });

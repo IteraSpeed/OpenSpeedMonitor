@@ -3,7 +3,7 @@
     <osm-spinner [spinnerId]="'violin-chart-spinner'"></osm-spinner>
 
     <div class="settings-row">
-      <input (ngModelChange)="drawChart()" [(ngModel)]="dataTrimValue"
+      <input [(ngModel)]="dataTrimValue" (ngModelChange)="setDataTrimValue()"
              [max]="maxValueForInputField"
              [step]="stepForInputField" class="form-control settings-element max-value-input-field"
              min="0" placeholder="{{'frontend.de.iteratec.osm.distribution.chart.settings.maximum' | translate}}"

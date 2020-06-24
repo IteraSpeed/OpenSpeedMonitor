@@ -54,7 +54,7 @@ class AggregationController extends ExceptionHandlerController {
         // return if no data is available
         boolean hasComparativeData = barchartAggregations.any { it.valueComparative != null }
         if (!barchartAggregations.any { it.value != null } && !hasComparativeData) {
-            ControllerUtils.sendObjectAsJSON(response, [:])
+            ControllerUtils.sendObjectAsJSON(response, new AggregationChartDTO(series: []))
             return
         }
 

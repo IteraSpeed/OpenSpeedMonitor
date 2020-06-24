@@ -22,7 +22,7 @@ export class AggregationChartDataService {
   filterRules = {};
   i18nMap: { comparativeDeterioration: string, comparativeImprovement: string, jobGroup: string, measurand: string, page: string };
   series: AggregationChartSeries[] = [];
-  selectedFilter = 'asc';
+  filter = 'asc';
   aggregationType = 'avg';
   percentileValue = 50;
   stackBars = false;
@@ -67,12 +67,7 @@ export class AggregationChartDataService {
               private translateService: TranslateService,
               private measurandColorService: MeasurandColorService
   ) {
-    route.queryParams.subscribe((params: Params) => {
-      this.selectedFilter = params.selectedFilter ? params.selectedFilter : this.selectedFilter;
-      this.aggregationType = params.selectedAggregationValue ? params.selectedAggregationValue : this.aggregationType;
-      this.stackBars = params.stackBars === '1';
-      this.percentileValue = params.selectedPercentile ? parseInt(params.selectedPercentile, 10) : this.percentileValue;
-    });
+    this.readChartSettingsByUrl();
   }
 
   getBarchartData(resultSelectionCommand: ResultSelectionCommand,
@@ -86,7 +81,7 @@ export class AggregationChartDataService {
       this.hideChartIfNoDataAvailable();
     });
 
-    this.writeAdditionalQueryParams();
+    this.writeQueryWithAdditionalParams();
 
     this.barchartDataService.fetchBarchartData<any>(
       resultSelectionCommand,
@@ -121,11 +116,11 @@ export class AggregationChartDataService {
       URL.AGGREGATION_BARCHART_DATA
     ).subscribe(result => {
       this.barchartMedianData$.next(this.sortDataByMeasurandOrder(result));
-      this.writeAdditionalQueryParams();
+      this.writeQueryWithAdditionalParams();
     });
   }
 
-  public setData(): void {
+  setData(): void {
     let data;
     if (this.aggregationType === 'percentile') {
       data = this.barchartMedianData$.getValue();
@@ -148,7 +143,7 @@ export class AggregationChartDataService {
     }
   }
 
-  public setMeasurandDataMap(series: AggregationChartSeries[]): void {
+  setMeasurandDataMap(series: AggregationChartSeries[]): void {
     let measurands: string[] = [];
     const measurandDataMap: AggregationChartDataByMeasurand = {};
     if (series) {
@@ -202,7 +197,7 @@ export class AggregationChartDataService {
     this.allMeasurandDataMap = measurandDataMap;
   }
 
-  public setDataForScoreBar(): void {
+  setDataForScoreBar(): void {
     const barsToRender = [];
     let minValue = 0;
     let maxValue = 0;
@@ -259,7 +254,7 @@ export class AggregationChartDataService {
     }
   }
 
-  public setDataForHeader(): void {
+  setDataForHeader(): void {
     const data = this.getDataForLabels();
     let header = '';
     let aggregation = '';
@@ -281,11 +276,11 @@ export class AggregationChartDataService {
     this.dataForHeader = header;
   }
 
-  public setUniqueSideLabels(): void {
+  setUniqueSideLabels(): void {
     this.uniqueSideLabels = this.getDataForLabels().map(x => x.sideLabel).filter((el, i, a) => i === a.indexOf(el));
   }
 
-  public createEmptyBarsForMissingData(): void {
+  createEmptyBarsForMissingData(): void {
     let sideLabelsForMeasurand: string[] = [];
     Object.keys(this.allMeasurandDataMap).forEach((measurand) => {
       const data = this.allMeasurandDataMap[measurand];
@@ -312,7 +307,7 @@ export class AggregationChartDataService {
     });
   }
 
-  public setComparativeData(series: AggregationChartSeries[]) {
+  setComparativeData(series: AggregationChartSeries[]) {
     const comparativeData: AggregationChartSeries[] = [];
     series.forEach(datum => {
       const difference = datum.value - datum.valueComparative;
@@ -341,15 +336,24 @@ export class AggregationChartDataService {
     return series.concat(comparativeData);
   }
 
-  writeAdditionalQueryParams(): void {
+  writeQueryWithAdditionalParams(): void {
     const additionalParams: Params = {
-      selectedFilter: this.selectedFilter,
-      selectedAggregationValue: this.aggregationType,
-      selectedPercentile: this.percentileValue,
+      filter: this.filter,
+      aggregationType: this.aggregationType,
+      percentileValue: this.percentileValue,
       stackBars: this.stackBars ? 1 : 0
     };
 
     this.resultSelectionStore.writeQueryParams(additionalParams);
+  }
+
+  private readChartSettingsByUrl(): void {
+    this.route.queryParams.subscribe((params: Params) => {
+      this.filter = params.filter ? params.filter : this.filter;
+      this.aggregationType = params.aggregationType ? params.aggregationType : this.aggregationType;
+      this.stackBars = params.stackBars === '1';
+      this.percentileValue = params.percentileValue ? parseInt(params.percentileValue, 10) : this.percentileValue;
+    });
   }
 
   private sortDataByMeasurandOrder(data) {
@@ -368,22 +372,22 @@ export class AggregationChartDataService {
   }
 
   private sortSeriesByFilterRule(data): void {
-    if (this.selectedFilter === 'desc') {
+    if (this.filter === 'desc') {
       this.ascSelected = false;
       this.descSelected = true;
       Object.keys(this.filterRules).forEach((key) => this.filterRules[key].selected = false);
       data.series = data.series.sort((a, b) => (a.value > b.value) ? -1 : ((b.value > a.value) ? 1 : 0));
-    } else if (Object.keys(this.filterRules).includes(this.selectedFilter)) {
+    } else if (Object.keys(this.filterRules).includes(this.filter)) {
       this.ascSelected = false;
       this.descSelected = false;
       Object
         .keys(this.filterRules)
-        .forEach((key) => key === this.selectedFilter ? this.filterRules[key].selected = true : this.filterRules[key].selected = false);
-      const keyForFilterRule = Object.keys(this.filterRules).filter((key) => key === this.selectedFilter).toString();
+        .forEach((key) => key === this.filter ? this.filterRules[key].selected = true : this.filterRules[key].selected = false);
+      const keyForFilterRule = Object.keys(this.filterRules).filter((key) => key === this.filter).toString();
       const filterRule = this.filterRules[keyForFilterRule];
       data.series = data.series.filter(datum => filterRule.some(x => datum.jobGroup === x.jobGroup && datum.page === x.page));
     } else {
-      this.selectedFilter = 'asc';
+      this.filter = 'asc';
       this.ascSelected = true;
       this.descSelected = false;
       Object.keys(this.filterRules).forEach((key) => this.filterRules[key].selected = false);
