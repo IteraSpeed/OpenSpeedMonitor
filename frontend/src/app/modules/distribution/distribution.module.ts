@@ -9,7 +9,7 @@ import {ViolinChartComponent} from './components/violin-chart/violin-chart.compo
 import {FormsModule} from '@angular/forms';
 
 const DistributionRoutes: Routes = [
-  {path: 'show', component: DistributionComponent},
+  {path: 'show', component: DistributionComponent, data: {title: 'frontend.de.iteratec.osm.distribution.title'}},
   {path: '**', redirectTo: 'show', pathMatch: 'full'}
 ];
 

@@ -4,31 +4,7 @@
 </p>
 <osm-aggregation-chart *ngIf="showChart" [barchartAverageData]="barchartAverageData$ | async"
                        [barchartMedianData]="barchartMedianData$ | async"></osm-aggregation-chart>
-<div class="action-row">
-  <div class="col-md-12">
-    <osm-result-selection-submit [applicationsRequired]="true" [measurandsRequired]="true"
-                                 (submit)="getBarchartData()"></osm-result-selection-submit>
-  </div>
-</div>
-<div class="row">
-  <div class="col-md-12">
-    <div class="action-row">
 
-      <div class="col-md-4">
-        <osm-result-selection-time-frame [showComparativeTimeFrame]="true"></osm-result-selection-time-frame>
-        <osm-result-selection-measurands [multipleMeasurands]="true"></osm-result-selection-measurands>
-      </div>
-      <div class="col-md-3">
-        <osm-result-selection-application></osm-result-selection-application>
-      </div>
-      <div class="col-md-5">
-        <osm-result-selection-page-location-connectivity [showPageSelection]="true"
-                                                         [showBrowserSelection]="true"></osm-result-selection-page-location-connectivity>
-      </div>
-      <div class="col-md-12">
-        <osm-result-selection-reset></osm-result-selection-reset>
-      </div>
-
-    </div>
-  </div>
-</div>
+<osm-result-selection (submit)="getBarchartData()" [applicationsRequired]="true" [browser]="true"
+                      [measurandsRequired]="true" [multipleMeasurands]="true" [page]="true"
+                      [timeFrameComparative]="true"></osm-result-selection>

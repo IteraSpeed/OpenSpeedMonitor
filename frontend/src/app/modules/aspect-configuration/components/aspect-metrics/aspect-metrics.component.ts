@@ -3,12 +3,12 @@ import {
   ExtendedPerformanceAspect,
   PerformanceAspect,
   PerformanceAspectType
-} from "../../../../models/perfomance-aspect.model";
-import {Observable} from "rxjs";
-import {Application} from "../../../../models/application.model";
-import {Page} from "../../../../models/page.model";
-import {AspectConfigurationService} from "../../services/aspect-configuration.service";
-import {map} from "rxjs/operators";
+} from '../../../../models/perfomance-aspect.model';
+import {Observable} from 'rxjs';
+import {Application} from '../../../../models/application.model';
+import {Page} from '../../../../models/page.model';
+import {AspectConfigurationService} from '../../services/aspect-configuration.service';
+import {map} from 'rxjs/operators';
 
 @Component({
   selector: 'osm-aspect-metrics',
@@ -31,16 +31,16 @@ export class AspectMetricsComponent implements OnInit {
   ngOnInit() {
     this.aspectsToShow$ = this.aspectConfService.extendedAspects$.pipe(
       map((aspects: ExtendedPerformanceAspect[]) => {
-        return aspects.filter((aspect: ExtendedPerformanceAspect) => aspect.performanceAspectType.name == this.actualType.name)
+        return aspects.filter((aspect: ExtendedPerformanceAspect) => aspect.performanceAspectType.name === this.actualType.name);
       })
     );
   }
 
   getSelectedAspect(): PerformanceAspect {
-    if (typeof(this.application) === 'undefined') return null;
+    if (typeof(this.application) === 'undefined') { return null; }
     const matchingAspect: PerformanceAspect = this.aspectConfService.extendedAspects$.getValue().find((aspect: PerformanceAspect) => {
-      return aspect.applicationId == this.application.id && aspect.pageId == this.page.id &&
-        aspect.browserId == this.browserId && aspect.performanceAspectType.name == this.actualType.name
+      return aspect.applicationId === this.application.id && aspect.pageId === this.page.id &&
+        aspect.browserId === this.browserId && aspect.performanceAspectType.name === this.actualType.name;
     });
     return matchingAspect;
   }

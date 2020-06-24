@@ -21,10 +21,6 @@ const appRoutes: Routes = [
     loadChildren: './modules/landing/landing.module#LandingModule'
   },
   {
-    path: 'metricFinder',
-    loadChildren: './modules/metric-finder/metric-finder.module#MetricFinderModule'
-  },
-  {
     path: 'aggregation',
     loadChildren: './modules/aggregation/aggregation.module#AggregationModule'
   },
@@ -41,7 +37,7 @@ const appRoutes: Routes = [
     loadChildren: './modules/landing/landing.module#LandingModule',
     pathMatch: 'full'
   },
-  {path: '**', component: NotFoundComponent}];
+  {path: '**', component: NotFoundComponent, data: {title: 'frontend.de.iteratec.osm.error.notFound.title'}}];
 
 @NgModule({
   imports: [

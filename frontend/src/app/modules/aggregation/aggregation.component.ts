@@ -15,24 +15,14 @@ export class AggregationComponent implements OnInit {
   barchartMedianData$: BehaviorSubject<any> = new BehaviorSubject<any>([]);
   showChart = false;
 
-  constructor(
-    private barchartDataService: BarchartDataService,
-    private resultSelectionStore: ResultSelectionStore,
-    private aggregationChartDataService: AggregationChartDataService
-  ) {
-    this.aggregationChartDataService.barchartAverageData$.subscribe((data) => {
-      this.barchartAverageData$.next(data);
-    });
-    this.aggregationChartDataService.barchartMedianData$.subscribe((data) => {
-      this.barchartMedianData$.next(data);
-    });
-    this.resultSelectionStore.dataAvailable$.subscribe((dataAvailable: boolean) => {
-      this.showChart = this.showChart && dataAvailable;
-    });
+  constructor(private barchartDataService: BarchartDataService,
+              private resultSelectionStore: ResultSelectionStore,
+              private aggregationChartDataService: AggregationChartDataService) {
   }
 
   ngOnInit() {
     this.showChart = false;
+    this.initDataObservables();
     if (this.resultSelectionStore.validQuery) {
       this.getBarchartData();
     }
@@ -44,5 +34,17 @@ export class AggregationComponent implements OnInit {
       this.resultSelectionStore.resultSelectionCommand,
       this.resultSelectionStore.remainingResultSelection
     );
+  }
+
+  private initDataObservables(): void {
+    this.aggregationChartDataService.barchartAverageData$.subscribe((data) => {
+      this.barchartAverageData$.next(data);
+    });
+    this.aggregationChartDataService.barchartMedianData$.subscribe((data) => {
+      this.barchartMedianData$.next(data);
+    });
+    this.resultSelectionStore.dataAvailable$.subscribe((dataAvailable: boolean) => {
+      this.showChart = this.showChart && dataAvailable;
+    });
   }
 }

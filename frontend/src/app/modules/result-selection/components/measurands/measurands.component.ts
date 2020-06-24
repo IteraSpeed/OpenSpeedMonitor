@@ -39,39 +39,19 @@ export class MeasurandsComponent implements OnInit {
   @Input() addingMeasurandsDisabled$: BehaviorSubject<boolean> = new BehaviorSubject(false);
 
   constructor(private resultSelectionStore: ResultSelectionStore, private performanceAspectService: PerformanceAspectService) {
-    this.aspectTypes$ = this.performanceAspectService.aspectTypes$;
-    this.loadTimes$ = this.resultSelectionStore.loadTimes$;
-    this.userTimings$ = this.resultSelectionStore.userTimings$;
-    this.heroTimings$ = this.resultSelectionStore.heroTimings$;
-    this.requestCounts$ = this.resultSelectionStore.requestCounts$;
-    this.requestSizes$ = this.resultSelectionStore.requestSizes$;
-    this.percentages$ = this.resultSelectionStore.percentages$;
-
-    this.measurands$.next({
-      ...this.measurands$.getValue(),
-      data: [
-        this.loadTimes$,
-        this.userTimings$,
-        this.heroTimings$,
-        this.requestCounts$,
-        this.requestSizes$,
-        this.percentages$
-      ]
-    });
-    this.getDefaultValue();
   }
 
   ngOnInit() {
+    this.initObservables();
     this.resultSelectionStore.registerComponent(UiComponent.MEASURAND);
     this.loadingState().subscribe(next => {
       this.measurands$.next({...this.measurands$.getValue(), isLoading: next});
     });
+
     if (this.resultSelectionStore.validQuery) {
-      this.loadResultSelection();
+      this.initByUrlQuery();
     } else {
-      this.defaultValue$
-        .pipe(takeWhile((measurand: Measurand) => measurand === undefined, true))
-        .subscribe((measurand: Measurand) => this.setDefaultValue(measurand));
+      this.initWithStartValue();
     }
   }
 
@@ -111,6 +91,29 @@ export class MeasurandsComponent implements OnInit {
     }
   }
 
+  private initObservables(): void {
+    this.aspectTypes$ = this.performanceAspectService.aspectTypes$;
+    this.loadTimes$ = this.resultSelectionStore.loadTimes$;
+    this.userTimings$ = this.resultSelectionStore.userTimings$;
+    this.heroTimings$ = this.resultSelectionStore.heroTimings$;
+    this.requestCounts$ = this.resultSelectionStore.requestCounts$;
+    this.requestSizes$ = this.resultSelectionStore.requestSizes$;
+    this.percentages$ = this.resultSelectionStore.percentages$;
+
+    this.measurands$.next({
+      ...this.measurands$.getValue(),
+      data: [
+        this.loadTimes$,
+        this.userTimings$,
+        this.heroTimings$,
+        this.requestCounts$,
+        this.requestSizes$,
+        this.percentages$
+      ]
+    });
+    this.getDefaultValue();
+  }
+
   private loadingState(): Observable<boolean> {
     return combineLatest(
       this.aspectTypes$,
@@ -126,7 +129,7 @@ export class MeasurandsComponent implements OnInit {
     );
   }
 
-  private loadResultSelection(): void {
+  private initByUrlQuery(): void {
     let allMeasurands: SelectableMeasurand[];
     let performanceAspects: PerformanceAspectType[];
     const finishedLoading$: Subject<void> = new Subject<void>();
@@ -161,6 +164,12 @@ export class MeasurandsComponent implements OnInit {
         finishedLoading$.next();
       }
     });
+  }
+
+  private initWithStartValue(): void {
+    this.defaultValue$
+      .pipe(takeWhile((measurand: Measurand) => measurand === undefined, true))
+      .subscribe((measurand: Measurand) => this.setDefaultValue(measurand));
   }
 
   private setResultSelection(): void {

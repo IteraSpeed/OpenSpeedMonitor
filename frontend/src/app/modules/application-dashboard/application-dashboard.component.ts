@@ -4,13 +4,13 @@ import {combineLatest, Observable, Subject} from 'rxjs';
 import {filter, map, takeUntil} from 'rxjs/operators';
 import {ApplicationService} from '../../services/application.service';
 import {Application} from '../../models/application.model';
-import {PageMetricsDto} from "./models/page-metrics.model";
-import {ApplicationCsi, ApplicationCsiById} from "../../models/application-csi.model";
-import {Csi} from "../../models/csi.model";
-import {FailingJobStatistic} from "./models/failing-job-statistic.model";
-import {PerformanceAspectService} from "../../services/performance-aspect.service";
-import {PerformanceAspectType} from "../../models/perfomance-aspect.model";
-import {ResponseWithLoadingState} from "../../models/response-with-loading-state.model";
+import {PageMetricsDto} from './models/page-metrics.model';
+import {ApplicationCsi, ApplicationCsiById} from '../../models/application-csi.model';
+import {Csi} from '../../models/csi.model';
+import {FailingJobStatistic} from './models/failing-job-statistic.model';
+import {PerformanceAspectService} from '../../services/performance-aspect.service';
+import {PerformanceAspectType} from '../../models/perfomance-aspect.model';
+import {ResponseWithLoadingState} from '../../models/response-with-loading-state.model';
 
 @Component({
   selector: 'osm-application-dashboard',
@@ -33,7 +33,7 @@ export class ApplicationDashboardComponent implements OnDestroy {
     private route: ActivatedRoute,
     private router: Router,
     private applicationService: ApplicationService,
-    private performanceAspectService: PerformanceAspectService
+    private performanceAspectService: PerformanceAspectService,
   ) {
     this.pages$ = this.applicationService.aspectMetrics$;
     this.applications$ = applicationService.applications$.pipe(
@@ -42,7 +42,8 @@ export class ApplicationDashboardComponent implements OnDestroy {
     );
     this.applicationCsi$ = applicationService.selectSelectedApplicationCsi();
     this.isLoading$ = combineLatest(applicationService.applicationCsiById$, applicationService.selectedApplication$)
-      .pipe(map(([applicationCsiById, selectedApplication]: [ApplicationCsiById, Application]) => applicationCsiById.isLoading && !applicationCsiById[selectedApplication.id]));
+      .pipe(map(([applicationCsiById, selectedApplication]: [ApplicationCsiById, Application]) =>
+        applicationCsiById.isLoading && !applicationCsiById[selectedApplication.id]));
     this.recentCsiValue$ = this.applicationCsi$
       .pipe(map((applicationCsi: ApplicationCsi) => applicationCsi.recentCsi()));
     this.hasConfiguration$ = this.applicationCsi$
@@ -55,14 +56,6 @@ export class ApplicationDashboardComponent implements OnDestroy {
     this.aspectTypes$ = this.performanceAspectService.aspectTypes$;
   }
 
-  private handleNavigation(applicationId: string, applications: Application[]) {
-    if (!applicationId) {
-      this.updateApplication(applications[0]);
-      return;
-    }
-    this.applicationService.setSelectedApplication(applicationId);
-  }
-
   ngOnDestroy() {
     this.destroyed$.next(null);
     this.destroyed$.complete();
@@ -72,4 +65,11 @@ export class ApplicationDashboardComponent implements OnDestroy {
     this.router.navigate(['/applicationDashboard', application.id]);
   }
 
+  private handleNavigation(applicationId: string, applications: Application[]) {
+    if (!applicationId) {
+      this.updateApplication(applications[0]);
+      return;
+    }
+    this.applicationService.setSelectedApplication(applicationId);
+  }
 }

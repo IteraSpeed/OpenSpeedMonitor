@@ -2,7 +2,7 @@
   - {{(page$ | async)?.name}}</h1>
 <a (click)="deselectPage()" [routerLink]="['/applicationDashboard', (application$ | async)?.id || '']">
   <i class="fas fa-arrow-left"></i>
-  {{ 'frontend.back.label' | translate }}
+  {{ 'frontend.back.label.neuter' | translate }}
   {{(application$ | async)?.name}}
   {{ 'frontend.de.iteratec.osm.dashboard' | translate }}
 </a>

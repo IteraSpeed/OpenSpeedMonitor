@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 import {DistributionDataDTO, DistributionData} from './models/distribution-data.model';
 import {URL} from '../../enums/url.enum';
 import {ResultSelectionStore} from '../result-selection/services/result-selection.store';
@@ -15,7 +15,8 @@ export class DistributionComponent {
   showChartCard = false;
   results$ = new BehaviorSubject<DistributionDataDTO>(new DistributionData());
 
-  constructor(private violinChartService: ViolinchartDataService, private resultSelectionStore: ResultSelectionStore) {
+  constructor(private violinChartService: ViolinchartDataService,
+              private resultSelectionStore: ResultSelectionStore) {
   }
 
   getDistributionChartData() {

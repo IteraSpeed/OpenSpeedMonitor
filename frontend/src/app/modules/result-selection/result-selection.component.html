@@ -1,1 +1,34 @@
+<div class="action-row">
+  <div class="col-md-12">
+    <osm-result-selection-submit (submit)="emitSubmitEvent()" [applicationsRequired]="applicationsRequired"
+                                 [measurandsRequired]="measurandsRequired"
+                                 [pagesRequired]="pagesRequired"></osm-result-selection-submit>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class="action-row">
 
+      <div class="col-md-4">
+        <osm-result-selection-time-frame [showAggregation]="timeFrameAggregation"
+                                         [showComparativeTimeFrame]="timeFrameComparative"></osm-result-selection-time-frame>
+        <osm-result-selection-measurands [multipleMeasurands]="multipleMeasurands"></osm-result-selection-measurands>
+      </div>
+      <div class="col-md-3">
+        <osm-result-selection-application></osm-result-selection-application>
+      </div>
+      <div class="col-md-5">
+        <osm-result-selection-page-location-connectivity [pageRequired]="pagesRequired"
+                                                         [showBrowserSelection]="browser"
+                                                         [showConnectivitySelection]="connectivity"
+                                                         [showLocationSelection]="location"
+                                                         [showMeasuredStepSelection]="measuredStep"
+                                                         [showPageSelection]="page"></osm-result-selection-page-location-connectivity>
+      </div>
+      <div class="col-md-12">
+        <osm-result-selection-reset></osm-result-selection-reset>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -5,31 +5,5 @@
 
 <osm-violin-chart [dataInput]="this.results$ | async" [hidden]="!showChartCard"></osm-violin-chart>
 
-<div class="action-row">
-  <div class="col-md-12">
-    <osm-result-selection-submit (submit)="getDistributionChartData()" [applicationsRequired]="true" [measurandsRequired]="true"
-                                 [pagesRequired]="true"></osm-result-selection-submit>
-  </div>
-</div>
-<div class="row">
-  <div class="col-md-12">
-    <div class="action-row">
-      <div class="col-md-4">
-        <osm-result-selection-time-frame></osm-result-selection-time-frame>
-        <osm-result-selection-measurands></osm-result-selection-measurands>
-      </div>
-      <div class="col-md-3">
-        <osm-result-selection-application></osm-result-selection-application>
-      </div>
-      <div class="col-md-5">
-        <osm-result-selection-page-location-connectivity [pageRequired]="true"
-                                                         [showBrowserSelection]="false"
-                                                         [showPageSelection]="true">
-        </osm-result-selection-page-location-connectivity>
-      </div>
-      <div class="col-md-12">
-        <osm-result-selection-reset></osm-result-selection-reset>
-      </div>
-    </div>
-  </div>
-</div>
+<osm-result-selection (submit)="getDistributionChartData()" [applicationsRequired]="true" [measurandsRequired]="true"
+                      [page]="true" [pagesRequired]="true"></osm-result-selection>

@@ -32,9 +32,11 @@ export class MetricFinderComponent {
   }
 
   clearResults() {
-    this.lineChartCmp.clearSelection();
-    this.lineChartCmp.clearResults();
-    this.lineChartCmp.redraw();
+    if (this.lineChartCmp) {
+      this.lineChartCmp.clearSelection();
+      this.lineChartCmp.clearResults();
+      this.lineChartCmp.redraw();
+    }
     this.compFilmstripCmp.clearResults();
   }
 }

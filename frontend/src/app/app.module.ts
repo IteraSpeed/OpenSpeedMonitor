@@ -1,11 +1,11 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {ApplicationRef, Injector, NgModule, NgModuleFactory, SystemJsNgModuleLoader, Type} from '@angular/core';
-import {AppRoutingModule} from "./app-routing.module";
+import {AppRoutingModule} from './app-routing.module';
 import {APP_BASE_HREF} from '@angular/common';
-import {NotFoundComponent} from "./not-found.component";
-import {APP_COMPONENT_SELECTOR, AppComponent} from "./app.component";
-import {GlobalModule} from "./global.module";
-import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
+import {NotFoundComponent} from './not-found.component';
+import {APP_COMPONENT_SELECTOR, AppComponent} from './app.component';
+import {GlobalModule} from './global.module';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 
 
 @NgModule({
@@ -17,7 +17,7 @@ import {BrowserAnimationsModule} from "@angular/platform-browser/animations";
     GlobalModule
   ],
   providers: [SystemJsNgModuleLoader,
-    {provide: APP_BASE_HREF, useValue: '/',}
+    {provide: APP_BASE_HREF, useValue: '/'}
   ],
   entryComponents: [
     AppComponent

@@ -48,38 +48,18 @@ export class TimeFrameComponent implements OnInit {
 
   CalendarType: typeof CalendarType = CalendarType;
 
-  constructor(private resultSelectionStore: ResultSelectionStore, dateTimeAdapter: DateTimeAdapter<any>, osmLangService: OsmLangService) {
-    if (osmLangService.getOsmLang() === 'en') {
-      dateTimeAdapter.setLocale('en-GB');
-    } else {
-      dateTimeAdapter.setLocale(osmLangService.getOsmLang());
-    }
+  constructor(private resultSelectionStore: ResultSelectionStore,
+              private dateTimeAdapter: DateTimeAdapter<any>,
+              private osmLangService: OsmLangService) {
   }
 
   ngOnInit() {
+    this.setCalendarLanguage();
+
     if (this.resultSelectionStore.validQuery) {
-      this.selectedDates = [
-        this.resultSelectionStore.resultSelectionCommand.from,
-        this.resultSelectionStore.resultSelectionCommand.to
-      ];
-      if (this.resultSelectionStore.remainingResultSelection.fromComparative
-        && this.resultSelectionStore.remainingResultSelection.toComparative) {
-        this.comparativeSelectionActive = true;
-        this.selectedComparativeDates = [
-          this.resultSelectionStore.remainingResultSelection.fromComparative,
-          this.resultSelectionStore.remainingResultSelection.toComparative
-        ];
-      }
-      this.selectTimeFrame();
-
+      this.initByUrlQuery();
     } else {
-      const defaultFrom = new Date();
-      const defaultTo = new Date();
-      defaultFrom.setDate(defaultTo.getDate() - 3);
-      this.selectedDates = [defaultFrom, defaultTo];
-      this.timeFrameInSeconds = TIME_FRAME_IN_SECONDS.THREE_DAYS;
-
-      this.resultSelectionStore.setResultSelectionCommandTimeFrame(this.selectedDates);
+      this.initWithStartValues();
     }
 
     if (this.showAggregation) {
@@ -194,6 +174,40 @@ export class TimeFrameComponent implements OnInit {
 
   selectInterval() {
     this.resultSelectionStore.setRemainingResultSelectionInterval(this.aggregationIntervalInSeconds);
+  }
+
+  private setCalendarLanguage(): void {
+    if (this.osmLangService.getOsmLang() === 'en') {
+      this.dateTimeAdapter.setLocale('en-GB');
+    } else {
+      this.dateTimeAdapter.setLocale(this.osmLangService.getOsmLang());
+    }
+  }
+
+  private initByUrlQuery(): void {
+    this.selectedDates = [
+      this.resultSelectionStore.resultSelectionCommand.from,
+      this.resultSelectionStore.resultSelectionCommand.to
+    ];
+    if (this.resultSelectionStore.remainingResultSelection.fromComparative
+      && this.resultSelectionStore.remainingResultSelection.toComparative) {
+      this.comparativeSelectionActive = true;
+      this.selectedComparativeDates = [
+        this.resultSelectionStore.remainingResultSelection.fromComparative,
+        this.resultSelectionStore.remainingResultSelection.toComparative
+      ];
+    }
+    this.selectTimeFrame();
+  }
+
+  private initWithStartValues(): void {
+    const defaultFrom = new Date();
+    const defaultTo = new Date();
+    defaultFrom.setDate(defaultTo.getDate() - 3);
+    this.selectedDates = [defaultFrom, defaultTo];
+    this.timeFrameInSeconds = TIME_FRAME_IN_SECONDS.THREE_DAYS;
+
+    this.resultSelectionStore.setResultSelectionCommandTimeFrame(this.selectedDates);
   }
 
   private setDatesFromTimeFrame(): void {

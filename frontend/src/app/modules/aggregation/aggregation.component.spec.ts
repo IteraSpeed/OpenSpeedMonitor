@@ -19,7 +19,7 @@ describe('AggregationComponent', () => {
       imports: [
         SharedModule,
         SharedMocksModule,
-        ResultSelectionModule,
+        ResultSelectionModule
       ],
       providers: [
         BarchartDataService,

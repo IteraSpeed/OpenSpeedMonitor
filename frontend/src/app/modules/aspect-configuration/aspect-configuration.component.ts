@@ -26,7 +26,8 @@ export class AspectConfigurationComponent implements OnInit {
     private route: ActivatedRoute,
     private applicationService: ApplicationService,
     private aspectConfService: AspectConfigurationService,
-    private perfAspectService: PerformanceAspectService) {
+    private perfAspectService: PerformanceAspectService
+  ) {
     this.application$ = applicationService.selectedApplication$;
     this.page$ = aspectConfService.selectedPage$;
     this.performanceAspects$ = aspectConfService.extendedAspects$;

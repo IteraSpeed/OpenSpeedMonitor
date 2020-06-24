@@ -1,38 +1,12 @@
 <osm-menu></osm-menu>
 
-<div class="action-row" *ngIf="showTimeSeriesChart">
+<div *ngIf="showTimeSeriesChart" class="action-row">
   <div class="col-md-12">
     <osm-time-series-line-chart [timeSeriesResults]="results$ | async"></osm-time-series-line-chart>
   </div>
 </div>
 
-<div class="action-row">
-  <div class="col-md-12">
-    <osm-result-selection-submit [measurandsRequired]="true" [applicationsRequired]="true" [pagesRequired]="true"
-                                 (submit)="getTimeSeriesChartData()"></osm-result-selection-submit>
-  </div>
-</div>
-<div class="row">
-  <div class="col-md-12">
-    <div class="action-row">
-
-      <div class="col-md-4">
-        <osm-result-selection-time-frame [showAggregation]="true"></osm-result-selection-time-frame>
-        <osm-result-selection-measurands [multipleMeasurands]="true"></osm-result-selection-measurands>
-      </div>
-      <div class="col-md-3">
-        <osm-result-selection-application></osm-result-selection-application>
-      </div>
-      <div class="col-md-5">
-        <osm-result-selection-page-location-connectivity [showPageSelection]="true" [showMeasuredStepSelection]="true"
-                                                         [showBrowserSelection]="true" [showLocationSelection]="true"
-                                                         [showConnectivitySelection]="true" [pageRequired]="true">
-        </osm-result-selection-page-location-connectivity>
-      </div>
-      <div class="col-md-12">
-        <osm-result-selection-reset></osm-result-selection-reset>
-      </div>
-
-    </div>
-  </div>
-</div>
+<osm-result-selection (submit)="getTimeSeriesChartData()" [applicationsRequired]="true" [browser]="true"
+                      [connectivity]="true" [location]="true" [measurandsRequired]="true" [measuredStep]="true"
+                      [multipleMeasurands]="true" [page]="true" [pagesRequired]="true"
+                      [timeFrameAggregation]="true"></osm-result-selection>

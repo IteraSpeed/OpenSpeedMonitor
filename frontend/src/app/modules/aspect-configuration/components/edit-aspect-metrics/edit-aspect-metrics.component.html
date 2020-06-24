@@ -2,22 +2,23 @@
   - {{(page$ | async)?.name}}</h1>
 <a [routerLink]="['/aspectConfiguration', (application$ | async)?.id || '', (page$ | async)?.id || '']">
   <i class="fas fa-arrow-left"></i>
-  {{ 'frontend.back.label' | translate }}
-  {{ 'frontend.de.iteratec.osm.performance-aspect.configuration.link-title' | translate }}
+  {{ 'frontend.back.label.feminine' | translate }}
+  {{ 'frontend.de.iteratec.osm.performance-aspect.configuration.overview.link-title' | translate }}
 </a>
 
 <div class="grid-container">
   <div class="card">
-    <osm-aspect-metrics [application]="application$ | async"
-                        [page]="page$ | async"
+    <osm-aspect-metrics [actualType]="aspectType$ | async"
+                        [application]="application$ | async"
                         [browserId]="browserId$ | async"
-                        [actualType]="aspectType$ | async"
+                        [page]="page$ | async"
                         class="aspect-inspect"></osm-aspect-metrics>
   </div>
   <div class="card">
-    <osm-metric-finder [selectedMetric] = "selectedMetric"
+    <osm-metric-finder [selectedMetric]="selectedMetric"
     ></osm-metric-finder>
-    <button class="btn btn-primary btn-aspect-config"
-            [disabled]="!grailsBridgeService.globalOsmNamespace.user.loggedIn" (click)="persistAspect()">{{'frontend.default.button.save' | translate}}</button>
+    <button (click)="persistAspect()"
+            [disabled]="!grailsBridgeService.globalOsmNamespace.user.loggedIn"
+            class="btn btn-primary btn-aspect-config">{{'frontend.default.button.save' | translate}}</button>
   </div>
 </div>

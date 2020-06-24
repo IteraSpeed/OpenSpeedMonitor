@@ -23,11 +23,19 @@ export class SubmitComponent implements OnInit {
   @Output() submit: EventEmitter<void> = new EventEmitter<void>();
 
   constructor(private resultSelectionStore: ResultSelectionStore) {
-    this.resultCount$ = this.resultSelectionStore.resultCount$;
-    this.dataAvailable$ = this.resultSelectionStore.dataAvailable$;
   }
 
   ngOnInit() {
+    this.resultCount$ = this.resultSelectionStore.resultCount$;
+    this.dataAvailable$ = this.resultSelectionStore.dataAvailable$;
+    this.observeIfSelected();
+  }
+
+  show(): void {
+    this.submit.emit();
+  }
+
+  private observeIfSelected(): void {
     this.resultSelectionStore._resultSelectionCommand$.subscribe((next: ResultSelectionCommand) => {
       if (next.jobGroupIds) {
         this.applicationsSelected$.next(next.jobGroupIds.length > 0);
@@ -48,9 +56,5 @@ export class SubmitComponent implements OnInit {
           .next(this.measurandsOrPerformanceAspectsSelected$.getValue() || next.performanceAspectTypes.length > 0);
       }
     });
-  }
-
-  show(): void {
-    this.submit.emit();
   }
 }

@@ -31,12 +31,18 @@ export class PageLocationConnectivityComponent implements OnInit {
   @Input() pageRequired = false;
 
   constructor(private resultSelectionService: ResultSelectionService, private resultSelectionStore: ResultSelectionStore) {
-    this.eventsAndPages$ = this.resultSelectionStore.eventsAndPages$;
-    this.locationsAndBrowsers$ = this.resultSelectionStore.locationsAndBrowsers$;
-    this.connectivities$ = this.resultSelectionStore.connectivities$;
   }
 
   ngOnInit(): void {
+    this.eventsAndPages$ = this.resultSelectionStore.eventsAndPages$;
+    this.locationsAndBrowsers$ = this.resultSelectionStore.locationsAndBrowsers$;
+    this.connectivities$ = this.resultSelectionStore.connectivities$;
+
+    this.registerComponentsInStore();
+    this.setActiveTab();
+  }
+
+  private registerComponentsInStore(): void {
     if (this.showMeasuredStepSelection || this.showPageSelection) {
       this.resultSelectionStore.registerComponent(UiComponent.PAGE);
     }
@@ -46,7 +52,9 @@ export class PageLocationConnectivityComponent implements OnInit {
     if (this.showConnectivitySelection) {
       this.resultSelectionStore.registerComponent(UiComponent.CONNECTIVITY);
     }
+  }
 
+  private setActiveTab(): void {
     if (this.showPageSelection) {
       this.activeTab = ActiveTab.PageAndEvent;
     } else if (!this.showPageSelection && this.showBrowserSelection) {

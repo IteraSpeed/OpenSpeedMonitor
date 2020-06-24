@@ -3,7 +3,7 @@ import {SelectableApplication} from 'src/app/models/application.model';
 import {ResultSelectionStore} from '../../services/result-selection.store';
 import {ResultSelectionCommandParameter} from '../../models/result-selection-command.model';
 import {UiComponent} from '../../../../enums/ui-component.enum';
-import {ActivatedRoute} from '@angular/router';
+import {ResponseWithLoadingState} from '../../../../models/response-with-loading-state.model';
 
 @Component({
   selector: 'osm-result-selection-application',
@@ -21,19 +21,14 @@ export class ApplicationComponent implements OnInit {
   selectedTag = '';
   unfilteredSelectedApplications: number[] = [];
 
-  constructor(private resultSelectionStore: ResultSelectionStore, private route: ActivatedRoute) {
-    this.resultSelectionStore.applications$.subscribe(applications => {
-      this.updateApplicationsAndTags(applications.data);
-    });
-  }
-
-  private static sortByName(applications: SelectableApplication[]): SelectableApplication[] {
-    return applications.sort((a, b) => {
-      return a.name.localeCompare(b.name);
-    });
+  constructor(private resultSelectionStore: ResultSelectionStore) {
   }
 
   ngOnInit() {
+    this.resultSelectionStore.applications$.subscribe((applications: ResponseWithLoadingState<SelectableApplication[]>) => {
+      this.updateApplicationsAndTags(applications.data);
+    });
+
     this.resultSelectionStore.registerComponent(UiComponent.APPLICATION);
     this.resultSelectionStore.reset$.subscribe(() => this.resetResultSelection());
     if (this.resultSelectionStore.resultSelectionCommand.jobGroupIds) {
@@ -69,7 +64,7 @@ export class ApplicationComponent implements OnInit {
 
   private updateApplications(applications: SelectableApplication[]): void {
     if (applications != null && applications.length > 0) {
-      this.applications = ApplicationComponent.sortByName(applications);
+      this.applications = this.sortByName(applications);
     } else {
       this.applications = [];
     }
@@ -133,5 +128,11 @@ export class ApplicationComponent implements OnInit {
         this.resultSelectionStore.setResultSelectionCommandIds(this.selectedApplications, ResultSelectionCommandParameter.APPLICATIONS);
       }
     }
+  }
+
+  private sortByName(applications: SelectableApplication[]): SelectableApplication[] {
+    return applications.sort((a, b) => {
+      return a.name.localeCompare(b.name);
+    });
   }
 }

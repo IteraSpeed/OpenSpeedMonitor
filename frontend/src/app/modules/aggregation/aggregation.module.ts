@@ -10,7 +10,8 @@ import {AggregationChartDataService} from './services/aggregation-chart-data.ser
 import {FormsModule} from '@angular/forms';
 
 const AggregationRoutes: Routes = [
-  {path: 'show', component: AggregationComponent},
+  {path: 'show', component: AggregationComponent, data: {title: 'frontend.de.iteratec.osm.aggregation.title'}},
+  {path: '**', redirectTo: 'show', pathMatch: 'full'}
 ];
 
 @NgModule({

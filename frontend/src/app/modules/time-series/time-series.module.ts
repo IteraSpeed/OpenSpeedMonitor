@@ -10,7 +10,8 @@ import {LineChartDataService} from './services/line-chart-data.service';
 import {FormsModule} from '@angular/forms';
 
 const TimeSeriesRoutes: Routes = [
-  {path: 'showAll', component: TimeSeriesComponent},
+  {path: 'showAll', component: TimeSeriesComponent, data: {title: 'frontend.de.iteratec.osm.timeSeries.title'}},
+  {path: '**', redirectTo: 'showAll', pathMatch: 'full'}
 ];
 
 @NgModule({
