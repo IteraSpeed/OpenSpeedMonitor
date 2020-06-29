@@ -16,7 +16,7 @@ import {EventResultSeriesDTO} from '../../models/event-result-series.model';
 import {EventResultDataDTO} from '../../models/event-result-data.model';
 import {TranslateService} from '@ngx-translate/core';
 import {LineChartDrawService} from './line-chart-draw.service';
-import {LineChartEventService} from './line-chart-event.service';
+import {LineChartDomEventService} from './line-chart-dom-event.service';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +30,7 @@ export class LineChartLegendService {
 
   constructor(private translationService: TranslateService,
               private lineChartDrawService: LineChartDrawService,
-              private lineChartEventService: LineChartEventService) {
+              private lineChartDomEventService: LineChartDomEventService) {
   }
 
   get legendDataMap(): { [p: string]: { [p: string]: boolean | string } } {
@@ -93,7 +93,7 @@ export class LineChartLegendService {
     if (this._legendGroupColumns < 1) {
       this._legendGroupColumns = 1;
     }
-    return Math.ceil(labels.length / this._legendGroupColumns) * ChartCommons.LABEL_HEIGHT + 30;
+    return Math.ceil(labels.length / this._legendGroupColumns) * ChartCommons.LABEL_HEIGHT;
   }
 
   addLegendsToChart(chartContentContainer: D3Selection<D3BaseType, {}, D3ContainerElement, {}>,
@@ -249,7 +249,7 @@ export class LineChartLegendService {
 
     Object.keys(yScales).forEach((key: string, index: number) => {
       this.lineChartDrawService.addDataLinesToChart(
-        chartContentContainer, this.lineChartEventService.pointsSelection, xScale, yScales[key], data[key], this._legendDataMap, index);
+        chartContentContainer, this.lineChartDomEventService.pointsSelection, xScale, yScales[key], data[key], this._legendDataMap, index);
     });
 
     // redraw legend

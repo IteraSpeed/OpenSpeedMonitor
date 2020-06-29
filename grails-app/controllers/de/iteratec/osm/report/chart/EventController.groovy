@@ -17,13 +17,13 @@
 
 package de.iteratec.osm.report.chart
 
+
+import de.iteratec.osm.report.chart.events.EventDTO
+
+import de.iteratec.osm.report.chart.events.GetEventsCommand
 import de.iteratec.osm.util.ControllerUtils
-import grails.converters.JSON
-import org.joda.time.DateTime
 import org.springframework.http.HttpStatus
 import org.springframework.web.servlet.support.RequestContextUtils
-
-import javax.servlet.http.HttpServletResponse
 
 /**
  * EventController
@@ -122,6 +122,18 @@ class EventController {
                 redirect(action: "show", id: params.id)
             }
         }
+    }
+
+    def getEvents(GetEventsCommand cmd) {
+        if (cmd.hasErrors()) {
+            ControllerUtils.sendSimpleResponseAsStream(response, HttpStatus.BAD_REQUEST,
+                "Invalid parameters: " + cmd.getErrors().fieldErrors.collect { it.field }.join(", "))
+
+            return
+        }
+
+        List<EventDTO> eventList = eventService.getEventsByDateRangeAndJobGroups(cmd)
+        ControllerUtils.sendObjectAsJSON(response, eventList)
     }
 
     /**

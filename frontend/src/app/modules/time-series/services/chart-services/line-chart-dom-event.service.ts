@@ -19,11 +19,13 @@ import {LineChartDrawService} from './line-chart-draw.service';
 import {LineChartScaleService} from './line-chart-scale.service';
 import {PointsSelection} from '../../models/points-selection.model';
 import {TranslateService} from '@ngx-translate/core';
+import {TimeEvent} from '../../models/event.model';
+import {LineChartTimeEventService} from './line-chart-time-event.service';
 
 @Injectable({
   providedIn: 'root'
 })
-export class LineChartEventService {
+export class LineChartDomEventService {
 
   private _DOT_HIGHLIGHT_RADIUS = 5;
   private _contextMenuBackground: D3Selection<D3BaseType, number, D3BaseType, unknown>;
@@ -38,7 +40,8 @@ export class LineChartEventService {
   constructor(private urlBuilderService: UrlBuilderService,
               private translationService: TranslateService,
               private lineChartDrawService: LineChartDrawService,
-              private lineChartScaleService: LineChartScaleService) {
+              private lineChartScaleService: LineChartScaleService,
+              private lineChartTimeEventService: LineChartTimeEventService) {
   }
 
   private _pointSelectionErrorHandler: Function;
@@ -53,7 +56,7 @@ export class LineChartEventService {
     return this._pointsSelection;
   }
 
-  private contextMenu: ContextMenuPosition[] = [
+  private readonly contextMenu: ContextMenuPosition[] = [
     {
       title: 'summary',
       icon: 'fas fa-file-alt',
@@ -156,7 +159,7 @@ export class LineChartEventService {
     },
   ];
 
-  private backgroundContextMenu: ContextMenuPosition[] = [
+  private readonly backgroundContextMenu: ContextMenuPosition[] = [
     {
       title: 'compareFilmstrips',
       icon: 'fas fa-columns',
@@ -241,22 +244,26 @@ export class LineChartEventService {
            width: number,
            height: number,
            yAxisWidth: number,
+           margin: { [key: string]: number },
            xScale: D3ScaleTime<number, number>,
            data: { [key: string]: TimeSeries[] },
            dataTrimValues: { [key: string]: { [key: string]: number } },
-           legendDataMap: { [key: string]: { [key: string]: (boolean | string) } }): void {
+           legendDataMap: { [key: string]: { [key: string]: (boolean | string) } },
+           events: TimeEvent[]): void {
     // remove old brush
     d3Select('.brush').remove();
 
     this.brush = d3BrushX()
       .extent([[0, 0], [width, height]])
-      .on('end', () => this.zoomInTheChart(chartContentContainer, width, height, yAxisWidth, xScale, data, dataTrimValues, legendDataMap));
+      .on('end', () =>
+        this.zoomInTheChart(chartContentContainer, width, height, yAxisWidth, margin, xScale, data, dataTrimValues, legendDataMap, events));
     chartContentContainer
       .append('g')
       .attr('class', 'brush')
       .call(this.brush);
     d3Select('.overlay')
-      .on('dblclick', () => this.resetChart(chartContentContainer, width, height, yAxisWidth, xScale, data, dataTrimValues, legendDataMap))
+      .on('dblclick', () =>
+        this.resetChart(chartContentContainer, width, height, yAxisWidth, margin, xScale, data, dataTrimValues, legendDataMap, events))
       .on('contextmenu', (d, i, e) => this.showContextMenu(this.backgroundContextMenu)(d, i, e));
   }
 
@@ -264,12 +271,14 @@ export class LineChartEventService {
                       width: number,
                       height: number,
                       yAxisWidth: number,
+                      margin: { [key: string]: number },
                       xScale: D3ScaleTime<number, number>,
                       data: { [key: string]: TimeSeries[] },
                       dataTrimValues: { [key: string]: { [key: string]: number } },
-                      legendDataMap: { [key: string]: { [key: string]: (boolean | string) } }): void {
+                      legendDataMap: { [key: string]: { [key: string]: (boolean | string) } },
+                      events: TimeEvent[]): void {
     if (this.brushMinDate !== null && this.brushMaxDate !== null) {
-      this.updateChart(chartContentContainer, width, height, yAxisWidth, xScale, data, dataTrimValues, legendDataMap);
+      this.updateChart(chartContentContainer, width, height, yAxisWidth, margin, xScale, data, dataTrimValues, legendDataMap, events);
     }
   }
 
@@ -290,7 +299,7 @@ export class LineChartEventService {
       .select((_, index: number, elem) => (<SVGElement>elem[index]).parentNode)
       .append('div')
       .attr('id', 'marker-tooltip')
-      .style('opacity', '0.9');
+      .style('opacity', '1');
   }
 
   private moveMarker(node: D3ContainerElement, width: number, containerHeight: number, marginTop: number, marginLeft: number): void {
@@ -323,13 +332,15 @@ export class LineChartEventService {
   }
 
   private zoomInTheChart(chartContentContainer: D3Selection<D3BaseType, {}, D3ContainerElement, {}>,
-                      width: number,
-                      height: number,
-                      yAxisWidth: number,
-                      xScale: D3ScaleTime<number, number>,
-                      data: { [key: string]: TimeSeries[] },
-                      dataTrimValues: { [key: string]: { [key: string]: number } },
-                      legendDataMap: { [key: string]: { [key: string]: (boolean | string) } }): void {
+                         width: number,
+                         height: number,
+                         yAxisWidth: number,
+                         margin: { [key: string]: number },
+                         xScale: D3ScaleTime<number, number>,
+                         data: { [key: string]: TimeSeries[] },
+                         dataTrimValues: { [key: string]: { [key: string]: number } },
+                         legendDataMap: { [key: string]: { [key: string]: (boolean | string) } },
+                         events: TimeEvent[]): void {
     const extent = d3Event.selection;
     if (!extent) {
       return;
@@ -339,17 +350,19 @@ export class LineChartEventService {
     d3Select('.brush').call(this.brush.move, null);
     this.brushMinDate = xScale.invert(extent[0]);
     this.brushMaxDate = xScale.invert(extent[1]);
-    this.updateChart(chartContentContainer, width, height, yAxisWidth, xScale, data, dataTrimValues, legendDataMap);
+    this.updateChart(chartContentContainer, width, height, yAxisWidth, margin, xScale, data, dataTrimValues, legendDataMap, events);
   }
 
   private resetChart(chartContentContainer: D3Selection<D3BaseType, {}, D3ContainerElement, {}>,
                      width: number,
                      height: number,
                      yAxisWidth: number,
+                     margin: { [key: string]: number },
                      xScale: D3ScaleTime<number, number>,
                      data: { [key: string]: TimeSeries[] },
                      dataTrimValues: { [key: string]: { [key: string]: number } },
-                     legendDataMap: { [key: string]: { [key: string]: (boolean | string) } }): void {
+                     legendDataMap: { [key: string]: { [key: string]: (boolean | string) } },
+                     events: TimeEvent[]): void {
     if (this.brushMinDate === null || this.brushMaxDate === null) {
       return;
     }
@@ -359,6 +372,7 @@ export class LineChartEventService {
     xScale.domain([this.lineChartScaleService.getMinDate(data), this.lineChartScaleService.getMaxDate(data)]);
     d3Select('.x-axis').transition().call((transition: D3Transition<SVGGElement, any, HTMLElement, any>) =>
       this.lineChartDrawService.updateXAxis(transition, xScale));
+    this.lineChartTimeEventService.addEventTimeLineAndMarkersToChart(chartContentContainer, xScale, events, width, height, margin);
     const yNewScales = this.lineChartScaleService.getYScales(data, height, dataTrimValues);
     this.lineChartDrawService.updateYAxes(yNewScales, width, yAxisWidth);
     Object.keys(yNewScales).forEach((key: string, index: number) => {
@@ -372,19 +386,22 @@ export class LineChartEventService {
                       width: number,
                       height: number,
                       yAxisWidth: number,
+                      margin: { [key: string]: number },
                       xScale: D3ScaleTime<number, number>,
                       data: { [key: string]: TimeSeries[] },
                       dataTrimValues: { [key: string]: { [key: string]: number } },
-                      legendDataMap: { [key: string]: { [key: string]: (boolean | string) } }): void {
+                      legendDataMap: { [key: string]: { [key: string]: (boolean | string) } },
+                      events: TimeEvent[]): void {
     xScale.domain([this.brushMinDate, this.brushMaxDate]);
 
     d3Select('.x-axis').transition().call((transition: D3Transition<SVGGElement, any, HTMLElement, any>) =>
-    this.lineChartDrawService.updateXAxis(transition, xScale));
+      this.lineChartDrawService.updateXAxis(transition, xScale));
+    this.lineChartTimeEventService.addEventTimeLineAndMarkersToChart(chartContentContainer, xScale, events, width, height, margin);
     const yNewScales = this.lineChartScaleService.getYScalesInTimeRange(data, height, dataTrimValues, this.brushMinDate, this.brushMaxDate);
     this.lineChartDrawService.updateYAxes(yNewScales, width, yAxisWidth);
     Object.keys(yNewScales).forEach((key: string, index: number) => {
-    this.lineChartDrawService.addDataLinesToChart(
-      chartContentContainer, this._pointsSelection, xScale, yNewScales[key], data[key], legendDataMap, index);
+      this.lineChartDrawService.addDataLinesToChart(
+        chartContentContainer, this._pointsSelection, xScale, yNewScales[key], data[key], legendDataMap, index);
     });
   }
 
@@ -438,7 +455,7 @@ export class LineChartEventService {
   }
 
   private showMarker(): void {
-    d3Select('.marker-line').style('opacity', 1);
+    d3Select('.marker-line').style('opacity', 0.5);
     d3Select('#marker-tooltip').style('opacity', 1);
   }
 
@@ -647,6 +664,8 @@ export class LineChartEventService {
     value.append(lineColorDot);
     if (currentPoint.value !== undefined && currentPoint.value !== null) {
       value.append(currentPoint.value.toString());
+    } else {
+      value.append(' -');
     }
 
     const row: HTMLTableRowElement = document.createElement('tr');

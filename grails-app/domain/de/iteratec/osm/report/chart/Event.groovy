@@ -27,6 +27,7 @@ import grails.gorm.annotation.Entity
 @Entity
 class Event {
 
+    Long id
     Date eventDate
     String shortName
     String description

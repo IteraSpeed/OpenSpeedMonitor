@@ -3,7 +3,8 @@ import {URL} from '../../enums/url.enum';
 import {LineChartDataService} from './services/line-chart-data.service';
 import {ResultSelectionStore} from '../result-selection/services/result-selection.store';
 import {EventResultData, EventResultDataDTO} from './models/event-result-data.model';
-import {BehaviorSubject} from 'rxjs';
+import {EventDTO} from './models/event.model';
+import {BehaviorSubject, forkJoin} from 'rxjs';
 
 @Component({
   selector: 'osm-time-series',
@@ -15,26 +16,44 @@ import {BehaviorSubject} from 'rxjs';
 })
 export class TimeSeriesComponent implements OnInit {
 
-  public showTimeSeriesChart = false;
-  public results$ = new BehaviorSubject<EventResultDataDTO>(new EventResultData());
+  showTimeSeriesChart = false;
+  results$ = new BehaviorSubject<EventResultDataDTO>(new EventResultData());
 
   constructor(private linechartDataService: LineChartDataService, private resultSelectionStore: ResultSelectionStore) {
   }
 
   ngOnInit() {
     if (this.resultSelectionStore.validQuery) {
-      this.getTimeSeriesChartData();
+      this.getData();
     }
   }
 
-  getTimeSeriesChartData() {
+  getData() {
     this.showTimeSeriesChart = true;
     this.results$.next(null);
 
-    this.linechartDataService.fetchEventResultData<EventResultDataDTO>(
+    forkJoin({
+      eventResultData: this.getTimeSeriesChartData(),
+      events: this.getEvents()
+    })
+      .subscribe((next) => {
+        next.eventResultData.events = next.events;
+        this.results$.next(next.eventResultData);
+      });
+  }
+
+  private getTimeSeriesChartData() {
+    return this.linechartDataService.fetchEventResultData<EventResultDataDTO>(
       this.resultSelectionStore.resultSelectionCommand,
       this.resultSelectionStore.remainingResultSelection,
       URL.EVENT_RESULT_DASHBOARD_LINECHART_DATA
-    ).subscribe(next => this.results$.next(next));
+    );
+  }
+
+  private getEvents() {
+    return this.linechartDataService.fetchEvents<EventDTO[]>(
+      this.resultSelectionStore.resultSelectionCommand,
+      URL.EVENTS
+    );
   }
 }

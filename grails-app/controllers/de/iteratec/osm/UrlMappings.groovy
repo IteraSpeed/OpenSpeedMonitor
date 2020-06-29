@@ -135,6 +135,10 @@ class UrlMappings {
 
         // GeneralMeasurementApiController //////////////////////////////////////////
 
+        "/rest/events" {
+            controller = "Event"
+            action = [GET: "getEvents"]
+        }
         "/rest/event/create" {
             controller = "GeneralMeasurementApi"
             action = [POST: "securedViaApiKeyCreateEvent"]

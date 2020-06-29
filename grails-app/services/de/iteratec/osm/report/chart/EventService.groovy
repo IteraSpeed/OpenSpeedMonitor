@@ -17,8 +17,10 @@
 
 package de.iteratec.osm.report.chart
 
+import de.iteratec.osm.report.chart.events.EventDTO
+
+import de.iteratec.osm.report.chart.events.GetEventsCommand
 import grails.gorm.transactions.Transactional
-import org.hibernate.criterion.CriteriaSpecification
 import org.hibernate.sql.JoinType
 import org.springframework.dao.DataIntegrityViolationException
 
@@ -93,6 +95,26 @@ class EventService {
             return
         }
         delegateMap.action.success.call(eventInstance)
+    }
+
+    List<EventDTO> getEventsByDateRangeAndJobGroups(GetEventsCommand cmd) {
+        Date from = cmd.from.toDate()
+        Date to = cmd.to.toDate()
+        List<Long> jobGroupIds = cmd.jobGroups.collect { it.toLong() }
+        def allEvents = retrieveEventsByDateRangeAndVisibilityAndJobGroup(from, to, jobGroupIds)
+
+        List<EventDTO> eventList = new ArrayList<>()
+        allEvents.forEach { event ->
+            EventDTO eventDTO = new EventDTO()
+            eventDTO.id = event.id
+            eventDTO.eventDate = event.eventDate
+            eventDTO.shortName = event.shortName
+            eventDTO.description = event.description
+
+            eventList.add(eventDTO)
+        }
+
+        return eventList
     }
 
     List findAllEventsBetweenDate(Date resetFromDate, Date resetToDate){

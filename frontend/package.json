@@ -29,7 +29,7 @@
     "d3": "^5.11.0",
     "ng-pick-datetime": "^7.0.0",
     "ngx-smart-modal": "^7.1.1",
-    "rxjs": "^6.4.0",
+    "rxjs": "^6.5.0",
     "spin.js": "^4.0.0",
     "zone.js": "^0.9.0"
   },

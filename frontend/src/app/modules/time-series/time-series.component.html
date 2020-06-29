@@ -8,8 +8,9 @@
 
 <div class="action-row">
   <div class="col-md-12">
-    <osm-result-selection-submit [measurandsRequired]="true" [applicationsRequired]="true" [pagesRequired]="true"
-                                 (submit)="getTimeSeriesChartData()"></osm-result-selection-submit>
+    <osm-result-selection-submit (submit)="getData()" [measurandsRequired]="true" [applicationsRequired]="true"
+                                 [pagesRequired]="true">
+    </osm-result-selection-submit>
   </div>
 </div>
 <div class="row">

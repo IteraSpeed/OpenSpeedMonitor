@@ -17,15 +17,17 @@ import {Transition as D3Transition} from 'd3-transition';
 import {EventResultDataDTO} from 'src/app/modules/time-series/models/event-result-data.model';
 import {EventResultSeriesDTO} from 'src/app/modules/time-series/models/event-result-series.model';
 import {EventResultPointDTO} from 'src/app/modules/time-series/models/event-result-point.model';
+import {EventDTO, TimeEvent} from 'src/app/modules/time-series/models/event.model';
 import {TimeSeries} from 'src/app/modules/time-series/models/time-series.model';
 import {TimeSeriesPoint} from 'src/app/modules/time-series/models/time-series-point.model';
 import {parseDate} from 'src/app/utils/date.util';
 import {UrlBuilderService} from './url-builder.service';
 import {LineChartScaleService} from './chart-services/line-chart-scale.service';
 import {LineChartDrawService} from './chart-services/line-chart-draw.service';
-import {LineChartEventService} from './chart-services/line-chart-event.service';
+import {LineChartDomEventService} from './chart-services/line-chart-dom-event.service';
 import {LineChartLegendService} from './chart-services/line-chart-legend.service';
 import {SummaryLabel} from '../models/summary-label.model';
+import {LineChartTimeEventService} from './chart-services/line-chart-time-event.service';
 
 /**
  * Generate line charts with ease and fun 😎
@@ -37,8 +39,9 @@ export class LineChartService {
   // D3 margin conventions
   // > With this convention, all subsequent code can ignore margins.
   // see: https://bl.ocks.org/mbostock/3019563
-  private MARGIN: { [key: string]: number } = {top: 60, right: 60, bottom: 40, left: 75};
+  private MARGIN: { [key: string]: number } = {top: 60, right: 60, bottom: 20, left: 75};
   private Y_AXIS_WIDTH = 65;
+  private readonly LEGEND_GROUP_OFFSET = 130;
 
   private _margin: { [key: string]: number } = {
     top: this.MARGIN.top,
@@ -48,15 +51,15 @@ export class LineChartService {
   };
   private _width: number = 600 - this._margin.left - this._margin.right;
   private _height: number = 550 - this._margin.top - this._margin.bottom;
-  private _legendGroupTop: number = this._margin.top + this._height + 50;
   private _xScale: D3ScaleTime<number, number>;
 
   constructor(private translationService: TranslateService,
               private urlBuilderService: UrlBuilderService,
               private lineChartScaleService: LineChartScaleService,
               private lineChartDrawService: LineChartDrawService,
-              private lineChartEventService: LineChartEventService,
-              private lineChartLegendService: LineChartLegendService) {
+              private lineChartDomEventService: LineChartDomEventService,
+              private lineChartLegendService: LineChartLegendService,
+              private lineChartTimeEventService: LineChartTimeEventService) {
   }
 
   private _dataTrimLabels: { [key: string]: string } = {};
@@ -72,14 +75,16 @@ export class LineChartService {
   }
 
   initChart(svgElement: ElementRef, pointSelectionErrorHandler: Function): void {
-    this.lineChartEventService.pointSelectionErrorHandler = pointSelectionErrorHandler;
+    this.lineChartDomEventService.pointSelectionErrorHandler = pointSelectionErrorHandler;
 
     const data: { [key: string]: TimeSeries[] } = {};
     const chart: D3Selection<D3BaseType, {}, D3ContainerElement, {}> = this.createChart(svgElement);
     this._xScale = this.lineChartScaleService.getXScale(data, this._width);
 
     this.addXAxisToChart(chart);
-    this.lineChartEventService.prepareMouseEventCatcher(chart, this._width, this._height, this._margin.top, this._margin.left);
+    this.lineChartTimeEventService.addEventMarkerGroupToChart(chart);
+    this.lineChartTimeEventService.addEventMarkerTooltipBoxToSvgParent();
+    this.lineChartDomEventService.prepareMouseEventCatcher(chart, this._width, this._height, this._margin.top, this._margin.left);
   }
 
   /**
@@ -123,16 +128,24 @@ export class LineChartService {
     return data;
   }
 
-  prepareLegend(incomingData: EventResultDataDTO): void {
+  prepareLegendData(incomingData: EventResultDataDTO): void {
     this.lineChartLegendService.setLegendData(incomingData);
   }
 
+  prepareEventsData(events: EventDTO[]): TimeEvent[] {
+    this.lineChartTimeEventService.clearEventMarkerSelection();
+    return events.map(eventDto => {
+      return new TimeEvent(eventDto.id, new Date(eventDto.eventDate), eventDto.description, eventDto.shortName);
+    });
+  }
+
   drawLineChart(timeSeries: { [key: string]: TimeSeries[] },
+                eventData: TimeEvent[],
                 measurandGroups: { [key: string]: string },
                 summaryLabels: SummaryLabel[],
                 timeSeriesAmount: number,
                 dataTrimValues: { [key: string]: { [key: string]: number } }): void {
-    this.lineChartEventService.prepareCleanState();
+    this.lineChartDomEventService.prepareCleanState();
 
     this.adjustChartDimensions(measurandGroups, summaryLabels);
     const chart: D3Selection<D3BaseType, {}, D3ContainerElement, {}> = d3Select('g#time-series-chart-drawing-area');
@@ -147,7 +160,7 @@ export class LineChartService {
     d3Select('svg#time-series-chart')
       .transition()
       .duration(500)
-      .attr('height', this._height + legendGroupHeight + this._margin.top + this._margin.bottom);
+      .attr('height', this._margin.top + this._height + this.LEGEND_GROUP_OFFSET + legendGroupHeight + this._margin.bottom);
 
     d3Select('.x-axis').transition().call((transition: D3Transition<SVGGElement, any, HTMLElement, any>) => {
       this.lineChartDrawService.updateXAxis(transition, this._xScale);
@@ -156,20 +169,22 @@ export class LineChartService {
     this.addYAxisUnits(measurandGroups, width);
 
     const chartContentContainer = chart.select('.chart-content');
-    this.lineChartEventService.createContextMenu();
-    this.lineChartEventService.addBrush(chartContentContainer, this._width, this._height, this.Y_AXIS_WIDTH, this._xScale,
-      timeSeries, dataTrimValues, this.lineChartLegendService.legendDataMap);
+    this.lineChartDomEventService.createContextMenu();
+    this.lineChartDomEventService.addBrush(chartContentContainer, this._width, this._height, this.Y_AXIS_WIDTH, this._margin,
+      this._xScale, timeSeries, dataTrimValues, this.lineChartLegendService.legendDataMap, eventData);
+    this.lineChartTimeEventService.addEventTimeLineAndMarkersToChart(chart, this._xScale, eventData, width,
+      this._height, this._margin);
 
     this.lineChartLegendService.addLegendsToChart(chartContentContainer, this._xScale, yScales, timeSeries, timeSeriesAmount);
     this.lineChartLegendService.setSummaryLabel(chart, summaryLabels, this._width);
 
     Object.keys(yScales).forEach((key: string, index: number) => {
-      this.lineChartDrawService.addDataLinesToChart(chartContentContainer, this.lineChartEventService.pointsSelection,
+      this.lineChartDrawService.addDataLinesToChart(chartContentContainer, this.lineChartDomEventService.pointsSelection,
         this._xScale, yScales[key], timeSeries[key], this.lineChartLegendService.legendDataMap, index);
     });
 
-    this.lineChartEventService.addMouseMarkerToChart(chartContentContainer);
-    this.lineChartDrawService.drawAllSelectedPoints(this.lineChartEventService.pointsSelection);
+    this.lineChartDomEventService.addMouseMarkerToChart(chartContentContainer);
+    this.lineChartDrawService.drawAllSelectedPoints(this.lineChartDomEventService.pointsSelection);
 
     this.setDataTrimLabels(measurandGroups);
 
@@ -179,10 +194,11 @@ export class LineChartService {
   }
 
   restoreZoom(timeSeriesData: { [key: string]: TimeSeries[] },
-              dataTrimValues: { [key: string]: { [key: string]: number } }): void {
+              dataTrimValues: { [key: string]: { [key: string]: number } },
+              events: TimeEvent[]): void {
     const chartContentContainer = d3Select('g#time-series-chart-drawing-area .chart-content');
-    this.lineChartEventService.restoreSelectedZoom(chartContentContainer, this._width, this._height,
-      this.Y_AXIS_WIDTH, this._xScale, timeSeriesData, dataTrimValues, this.lineChartLegendService.legendDataMap);
+    this.lineChartDomEventService.restoreSelectedZoom(chartContentContainer, this._width, this._height,
+      this.Y_AXIS_WIDTH, this._margin, this._xScale, timeSeriesData, dataTrimValues, this.lineChartLegendService.legendDataMap, events);
   }
 
   startResize(svgElement: ElementRef): void {
@@ -220,7 +236,7 @@ export class LineChartService {
     svg.append('g')
       .attr('id', 'time-series-chart-legend')
       .attr('class', 'legend-group')
-      .attr('transform', `translate(${this._margin.left}, ${this._legendGroupTop})`);
+      .attr('transform', `translate(${this._margin.left}, ${this._margin.top + this._height + this.LEGEND_GROUP_OFFSET})`);
 
     return chart;
   }
@@ -257,7 +273,6 @@ export class LineChartService {
     } else {
       this._margin.top = this.MARGIN.top + 20;
     }
-    this._legendGroupTop = this._margin.top + this._height + 50;
 
     d3Select('#time-series-chart')
       .attr('width', this._width + this._margin.left + this._margin.right);
@@ -269,7 +284,7 @@ export class LineChartService {
       .attr('transform', `translate(${this._margin.left}, ${this._margin.top})`);
 
     d3Select('#time-series-chart-legend')
-      .attr('transform', `translate(${this._margin.left}, ${this._legendGroupTop})`);
+      .attr('transform', `translate(${this._margin.left}, ${this._margin.top + this._height + this.LEGEND_GROUP_OFFSET})`);
   }
 
   private addYAxisUnits(measurandGroups: { [key: string]: string }, width: number): void {

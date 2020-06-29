@@ -10,5 +10,6 @@ export enum URL {
   RESULT_COUNT = '/resultSelection/getResultCount',
   AGGREGATION_BARCHART_DATA = '/aggregation/getBarchartData',
   EVENT_RESULT_DASHBOARD_LINECHART_DATA = '/eventResultDashboard/getLinechartData',
+  EVENTS = '/rest/events',
   DISTRIBUTION_VIOLINCHART_DATA = '/distributionChart/getViolinchartData'
 }
