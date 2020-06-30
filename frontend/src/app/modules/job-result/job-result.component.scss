@@ -1,0 +1,124 @@
+.description {
+  margin-left: 10px;
+}
+
+.job-selection {
+  margin-bottom: 20px;
+}
+
+.table-head {
+  max-width: 15em;
+}
+
+.sortable {
+  cursor: pointer;
+}
+
+.date-input-container {
+  display: inline-flex;
+  width: 100%;
+}
+
+.date-input-wrapper {
+  width: 100%;
+  margin-right: 10px;
+}
+
+.input-filter {
+  display: inline;
+  font-weight: normal;
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0);
+  height: 30px;
+  margin-top: 5px;
+  margin-left: -12px;
+}
+
+.input-filter:focus, .input-from:hover, .input-to:hover, .input-container:hover .input-filter {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.075);
+}
+
+.input-filter::placeholder {
+  font-style: italic;
+}
+
+.clear-input-wrapper {
+  margin-left: -30px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.clear-input {
+  display: inline-block;
+  font-weight: normal;
+  font-size: 18px;
+  line-height: 1;
+  pointer-events: none;
+  color: #999999;
+}
+
+.clear-input-wrapper:hover .clear-input {
+  color: #D0021B
+}
+
+.clear-date-wrapper {
+  margin-left: -15px;
+}
+
+.calendar-icon-wrapper {
+  margin-left: -5px;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.calendar-icon {
+  display: inline-block;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: none;
+  color: #999999;
+}
+
+.owl-dt-container {
+  font-size: inherit;
+}
+
+.owl-dt-container-buttons, .owl-dt-container-info {
+  display: none;
+}
+
+.owl-dt-timer-divider {
+  font-size: 12px;
+}
+
+.ng-select.custom .ng-select-container {
+  font-weight: normal;
+  border: none;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0);
+  min-height: 0;
+  margin-top: 5px;
+  margin-left: -10px;
+}
+
+.ng-select.custom .ng-option {
+  font-weight: normal;
+}
+
+.ng-select.custom .ng-select-container:hover, .ng-select.ng-select-focused:not(.ng-select-opened) > .ng-select-container {
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.075);
+}
+
+.ng-select.custom .ng-select-container .ng-placeholder {
+  font-style: italic;
+}
+
+.job-status-error {
+  color: #EB5E55;
+}

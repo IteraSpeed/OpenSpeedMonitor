@@ -4,16 +4,18 @@ import de.iteratec.osm.result.JobResult
 
 import java.text.SimpleDateFormat
 
-class FailedJobResultDTO {
+class JobResultDTO {
     String testId
+    String testAgent
     String date
     String jobResultStatus
     String wptStatus
     String description
     URL testUrl
 
-    FailedJobResultDTO(JobResult jobResult) {
+    JobResultDTO(JobResult jobResult) {
         testId = jobResult.testId
+        testAgent = jobResult.testAgent
         date = new SimpleDateFormat().format(jobResult.date)
         jobResultStatus = jobResult.jobResultStatus.getMessage()
         wptStatus = jobResult.wptStatus.getMessage()

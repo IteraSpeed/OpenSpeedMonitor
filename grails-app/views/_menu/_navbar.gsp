@@ -158,11 +158,12 @@
                             <g:message code="connectivityProfile.label.plural"/>
                         </g:link>
                     </li>
-                    <li class="${controllerName.equals('jobResult') ? 'active' : ''}">
-                        <g:link controller="jobResult" action="listFailed">
-                            <i class="fas fa-exclamation-circle" aria-hidden="true"></i>
-                            <g:message code="de.iteratec.osm.failedJobResults.buttonToPage" default="Failed JobResults"/>
-                        </g:link>
+                    <li class="${controllerName.equals('jobResult') ? 'active' : ''}"
+                        data-active-matches="/jobResult/list/?.*">
+                        <a href="${createLink(uri: '/jobResult/list')}">
+                            <i class="fas fa-clipboard-list" aria-hidden="true"></i>
+                            <g:message code="frontend.de.iteratec.osm.jobResult.title" default="Measurements"/>
+                        </a>
                     </li>
                 </ul>
             </li>

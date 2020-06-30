@@ -55,4 +55,12 @@ class JobStatisticService {
             maxResults(150)
         }
     }
+
+    List<JobResult> getLast150JobResultsFor(Job job) {
+        return  JobResult.createCriteria().list{
+            eq("job", job)
+            order("date", "desc")
+            maxResults(150)
+        }
+    }
 }

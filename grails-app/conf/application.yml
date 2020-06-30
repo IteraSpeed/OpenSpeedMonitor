@@ -303,7 +303,7 @@ grails:
                             {pattern: '/job/getLastRun',                                access: ['permitAll']},
                             {pattern: '/job/getTagsForJobs',                            access: ['permitAll']},
                             {pattern: '/job/showLastResultForJob/**',                   access: ['permitAll']},
-                            {pattern: '/job/showLastAggregationForJob/**',          access: ['permitAll']},
+                            {pattern: '/job/showLastAggregationForJob/**',              access: ['permitAll']},
                             {pattern: '/jobResult/**',                                  access: ['permitAll']},
                             {pattern: '/script/list',                                   access: ['permitAll']},
                             {pattern: '/register/*',                                    access: ['permitAll']},

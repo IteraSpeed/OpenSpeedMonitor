@@ -41,6 +41,7 @@ class UrlMappings {
         "/aspectConfiguration/**?"(view: "/angularFrontend")
         "/metricFinder/rest/$action"(controller: "metricFinder")
         "/aspectConfiguration/rest/$action"(controller: "aspectConfiguration")
+        "/jobResult/**"(view: "/angularFrontend")
 
         ////////////////////////////////////////////////////////////////////////////////////////////////
         // Pages with controller
@@ -217,6 +218,18 @@ class UrlMappings {
         "/distribution/getViolinchartData" {
             controller = "distribution"
             action = [GET: "getDistributionChartData"]
+        }
+
+        // JobResultController //////////////////////////////////////////
+
+        "/jobResult/getAllJobs" {
+            controller = "jobResult"
+            action = [GET: "getAllJobs"]
+        }
+
+        "/jobResult/getJobResults" {
+            controller = "jobResult"
+            action = [GET: "getJobResults"]
         }
     }
 }

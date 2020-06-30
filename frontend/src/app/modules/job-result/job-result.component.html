@@ -1,0 +1,178 @@
+<h1>
+  {{ 'frontend.de.iteratec.osm.jobResult.title' | translate }}
+</h1>
+<p class="description">
+  {{ 'frontend.de.iteratec.osm.jobResult.description' | translate }}
+</p>
+
+<div class="card">
+  <div class="col-sm-3 job-selection ">
+    <label for="select-job">
+      <strong>{{ 'frontend.de.iteratec.osm.jobResult.select.label.job' | translate }}</strong>
+    </label>
+    <ng-select [(ngModel)]="selectedJob" (change)="setJob(selectedJob)" [items]="jobs"
+               clearAllText="{{ 'frontend.de.iteratec.osm.jobResult.select.clearAll' | translate }}"
+               id="select-job"
+               loadingText="{{ 'frontend.de.iteratec.osm.jobResult.select.loading' | translate }}"
+               notFoundText="{{ 'frontend.de.iteratec.osm.jobResult.select.notFound' | translate }}"
+               placeholder="{{ 'frontend.de.iteratec.osm.jobResult.select.placeholder' | translate }}"
+               typeToSearchText="{{ 'frontend.de.iteratec.osm.jobResult.select.search' | translate }}">
+    </ng-select>
+  </div>
+
+  <div *ngIf="selectedJob && jobResults.length === 0"
+       class="col-sm-12">{{ 'frontend.de.iteratec.osm.jobResult.noData' | translate }}</div>
+
+  <table *ngIf="jobResults.length > 0" class="table table-striped">
+    <thead>
+    <tr>
+
+      <th class="table-head">
+        <span (click)="sort('date')" class="sortable">
+          {{ 'frontend.de.iteratec.osm.jobResult.tableHead.date' | translate }}
+          <i *ngIf="currentSortingRule.column === 'date' && currentSortingRule.direction === 'desc'"
+             aria-hidden="true" class="fas fa-sort-down"></i>
+          <i *ngIf="currentSortingRule.column === 'date' && currentSortingRule.direction === 'asc'"
+             aria-hidden="true" class="fas fa-sort-up"></i>
+        </span>
+        <div class="date-input-container">
+          <span class="input-container date-input-wrapper">
+            <input [(ngModel)]="filter.dateTimeRange" [owlDateTimeTrigger]="dateTimeRangeFrom"
+                   [owlDateTime]="dateTimeRangeFrom"
+                   [placeholder]="('frontend.de.iteratec.osm.jobResult.filter.placeholder.date.from' | translate)"
+                   [selectMode]="'rangeFrom'" class="form-control input-filter input-from">
+            <owl-date-time #dateTimeRangeFrom (afterPickerClosed)="setDateTimeRange(DateTimeRange.FROM)"
+                           (afterPickerOpen)="observeCalendarEvents(DateTimeRange.FROM)"
+                           firstDayOfWeek="1"></owl-date-time>
+            <span (click)="clearDateFilter(DateTimeRange.FROM)" *ngIf="isDateTimeRangeSet(DateTimeRange.FROM)"
+                  [title]="('frontend.de.iteratec.osm.jobResult.select.clearAll' | translate)"
+                  class="clear-input-wrapper clear-date-wrapper">
+              <span aria-hidden="true" class="clear-input">×</span>
+            </span>
+          </span>
+
+          <span class="input-container date-input-wrapper">
+            <input [(ngModel)]="filter.dateTimeRange" [owlDateTimeTrigger]="dateTimeRangeTo"
+                   [owlDateTime]="dateTimeRangeTo"
+                   [placeholder]="('frontend.de.iteratec.osm.jobResult.filter.placeholder.date.to' | translate)"
+                   [selectMode]="'rangeTo'"
+                   class="form-control input-filter input-to">
+            <owl-date-time #dateTimeRangeTo (afterPickerClosed)="setDateTimeRange(DateTimeRange.TO)"
+                           (afterPickerOpen)="observeCalendarEvents(DateTimeRange.TO)"
+                           firstDayOfWeek="1"></owl-date-time>
+            <span (click)="clearDateFilter(DateTimeRange.TO)" *ngIf="isDateTimeRangeSet(DateTimeRange.TO)"
+                  [title]="('frontend.de.iteratec.osm.jobResult.select.clearAll' | translate)"
+                  class="clear-input-wrapper clear-date-wrapper">
+              <span aria-hidden="true" class="clear-input">×</span>
+            </span>
+          </span>
+
+        </div>
+      </th>
+
+      <th class="table-head">
+        <span (click)="sort('testAgent')" class="sortable">
+          {{ 'frontend.de.iteratec.osm.jobResult.tableHead.testAgent' | translate }}
+          <i *ngIf="currentSortingRule.column === 'testAgent' && currentSortingRule.direction === 'desc'"
+             aria-hidden="true" class="fas fa-sort-down"></i>
+          <i *ngIf="currentSortingRule.column === 'testAgent' && currentSortingRule.direction === 'asc'"
+             aria-hidden="true" class="fas fa-sort-up"></i>
+        </span>
+        <div class="input-container">
+          <input [(ngModel)]="filter.testAgent" (ngModelChange)="applyFilter()"
+                 [placeholder]="('frontend.de.iteratec.osm.jobResult.filter.placeholder' | translate)"
+                 class="form-control input-filter"
+                 type="text">
+          <span (click)="clearTextFilter('testAgent')" *ngIf="filter.testAgent"
+                [title]="('frontend.de.iteratec.osm.jobResult.select.clearAll' | translate)"
+                class="clear-input-wrapper">
+            <span aria-hidden="true" class="clear-input">×</span>
+          </span>
+        </div>
+      </th>
+
+      <th class="table-head">
+        <span (click)="sort('jobResultStatus')" class="sortable">
+          {{ 'frontend.de.iteratec.osm.jobResult.tableHead.jobResultStatus' | translate }}
+          <i *ngIf="currentSortingRule.column === 'jobResultStatus' && currentSortingRule.direction === 'desc'"
+             aria-hidden="true" class="fas fa-sort-down"></i>
+          <i *ngIf="currentSortingRule.column === 'jobResultStatus' && currentSortingRule.direction === 'asc'"
+             aria-hidden="true" class="fas fa-sort-up"></i>
+        </span>
+        <ng-select [(ngModel)]="filter.jobResultStatus" (change)="applyFilter()" [closeOnSelect]="false"
+                   [compareWith]="compareStatusFn" [groupBy]="jobResultStatusGroupByFn" [groupValue]="groupValueFn"
+                   [items]="allJobResultStatus" [multiple]="true" [selectableGroup]="true" class="custom"
+                   clearAllText="{{ 'frontend.de.iteratec.osm.jobResult.select.clearAll' | translate }}"
+                   notFoundText="-"
+                   placeholder="{{ 'frontend.de.iteratec.osm.jobResult.filter.placeholder' | translate }}"
+                   typeToSearchText="{{ 'frontend.de.iteratec.osm.jobResult.select.search' | translate }}">
+        </ng-select>
+      </th>
+
+      <th class="table-head">
+        <span (click)="sort('wptStatus')" class="sortable">
+          {{ 'frontend.de.iteratec.osm.jobResult.tableHead.wptStatus' | translate }}
+          <i *ngIf="currentSortingRule.column === 'wptStatus' && currentSortingRule.direction === 'desc'"
+             aria-hidden="true" class="fas fa-sort-down"></i>
+          <i *ngIf="currentSortingRule.column === 'wptStatus' && currentSortingRule.direction === 'asc'"
+             aria-hidden="true" class="fas fa-sort-up"></i>
+        </span>
+        <ng-select [(ngModel)]="filter.wptStatus" (change)="applyFilter()" [closeOnSelect]="false"
+                   [compareWith]="compareStatusFn" [groupBy]="wptStatusGroupByFn" [groupValue]="groupValueFn"
+                   [items]="allWptStatus" [multiple]="true" [selectableGroup]="true" class="custom"
+                   clearAllText="{{ 'frontend.de.iteratec.osm.jobResult.select.clearAll' | translate }}"
+                   notFoundText="-"
+                   placeholder="{{ 'frontend.de.iteratec.osm.jobResult.filter.placeholder' | translate }}"
+                   typeToSearchText="{{ 'frontend.de.iteratec.osm.jobResult.select.search' | translate }}">
+        </ng-select>
+      </th>
+
+      <th class="table-head">
+        <span (click)="sort('description')" class="sortable">
+          {{ 'frontend.de.iteratec.osm.jobResult.tableHead.description' | translate }}
+          <i *ngIf="currentSortingRule.column === 'description' && currentSortingRule.direction === 'desc'"
+             aria-hidden="true" class="fas fa-sort-down"></i>
+          <i *ngIf="currentSortingRule.column === 'description' && currentSortingRule.direction === 'asc'"
+             aria-hidden="true" class="fas fa-sort-up"></i>
+        </span>
+        <div class="input-container">
+          <input [(ngModel)]="filter.description" (ngModelChange)="applyFilter()"
+                 [placeholder]="('frontend.de.iteratec.osm.jobResult.filter.placeholder' | translate)"
+                 class="form-control input-filter"
+                 type="text">
+          <span (click)="clearTextFilter('description')" *ngIf="filter.description"
+                [title]="('frontend.de.iteratec.osm.jobResult.select.clearAll' | translate)"
+                class="clear-input-wrapper">
+            <span aria-hidden="true" class="clear-input">×</span>
+          </span>
+        </div>
+      </th>
+
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let test of filteredJobResults">
+      <td>
+        <a [class.job-status-error]="hasTestFailed(test.jobResultStatus)"
+           [class.text-info]="isTestNotTerminated(test.jobResultStatus)"
+           [class.text-success]="isTestSuccessful(test.jobResultStatus)"
+           href="{{ test.testUrl }}">
+          <div><strong>{{ test.date | date:('frontend.de.iteratec.osm.jobResult.dateFormat' | translate) }}</strong></div>
+        </a>
+
+      </td>
+      <td>{{ test.testAgent ? test.testAgent : '-' }}</td>
+      <td>{{ test.jobResultStatus ? test.jobResultStatus : '-' }}</td>
+      <td>{{ test.wptStatus ? test.wptStatus : '-' }}</td>
+      <td>{{ test.description ? test.description : '-' }}</td>
+    </tr>
+    <tr *ngIf="filteredJobResults.length === 0">
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+    </tr>
+    </tbody>
+  </table>
+</div>

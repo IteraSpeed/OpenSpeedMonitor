@@ -9,7 +9,7 @@ import {MeasurandService} from './services/measurand.service';
 
 
 @Component({
-  selector: 'app-job-threshold',
+  selector: 'osm-job-threshold',
   templateUrl: './job-threshold.component.html',
   styleUrls: ['./job-threshold.component.scss']
 })
@@ -19,8 +19,8 @@ export class JobThresholdComponent {
   jobId: number;
   scriptId: number;
 
-  addMeasuredEventDisabled: boolean = false;
-  isEmpty: boolean = false;
+  addMeasuredEventDisabled = false;
+  isEmpty = false;
 
   allThresholdGroups$: Observable<ThresholdGroup[]>;
   unusedMeasuredEvents$: Observable<MeasuredEvent[]>;
@@ -54,7 +54,7 @@ export class JobThresholdComponent {
       this.measuredEventService.measuredEvents$,
       this.allThresholdGroups$
     ).subscribe(([measuredEvents, thresholdGroups]: [MeasuredEvent[], ThresholdGroup[]]) => {
-      this.isEmpty = thresholdGroups.length == 0;
+      this.isEmpty = thresholdGroups.length === 0;
       this.addMeasuredEventDisabled = thresholdGroups.length === measuredEvents.length;
     });
 
@@ -64,10 +64,10 @@ export class JobThresholdComponent {
     ).pipe(
       map(([thresholdGroups, measuredEvents]: [ThresholdGroup[], MeasuredEvent[]]) => {
         return measuredEvents.filter((measuredEvent: MeasuredEvent) =>
-          !thresholdGroups.some(thresholdGroup => thresholdGroup.measuredEvent.id == measuredEvent.id)
-        )
+          !thresholdGroups.some(thresholdGroup => thresholdGroup.measuredEvent.id === measuredEvent.id)
+        );
       })
-    )
+    );
   }
 
   addThresholdGroup() {

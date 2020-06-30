@@ -37,6 +37,10 @@ const appRoutes: Routes = [
     loadChildren: './modules/distribution/distribution.module#DistributionModule'
   },
   {
+    path: 'jobResult',
+    loadChildren: './modules/job-result/job-result.module#JobResultModule'
+  },
+  {
     path: '',
     loadChildren: './modules/landing/landing.module#LandingModule',
     pathMatch: 'full'

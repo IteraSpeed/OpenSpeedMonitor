@@ -17,7 +17,7 @@ export class ThresholdGroupComponent {
   @Input() unusedMeasuredEvents: MeasuredEvent[];
   @Output() removeEvent = new EventEmitter();
   @Input() newThreshold: Threshold;
-  addThresholdDisabled: boolean = false;
+  addThresholdDisabled = false;
   unusedMeasurands: Measurand[];
 
   @Input()
@@ -28,7 +28,7 @@ export class ThresholdGroupComponent {
     if (thresholdGroup.isNew) {
       this.addThreshold();
     }
-  };
+  }
 
   get thresholdGroup(): ThresholdGroup {
     return this._thresholdGroup;

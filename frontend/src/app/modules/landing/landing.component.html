@@ -40,7 +40,7 @@
           <li *ngFor="let failingJob of failingJobs[application]"
               [class.error]="failingJob.percentageFailLast5 > 20"
               [class.warning]="failingJob.percentageFailLast5 <= 20">
-            <a  href="/jobResult/listFailed?jobId={{failingJob.job_id}}">
+            <a href="/jobResult/list?job={{failingJob.job_id}}&status=group_failed">
               <aside class="percentage-aside">
                 <p class="percentage percentage-big">{{ failingJob.percentageFailLast5 }}%</p>
                 <p class="percentage">{{ 'frontend.de.iteratec.osm.landing.failure' | translate }}</p>

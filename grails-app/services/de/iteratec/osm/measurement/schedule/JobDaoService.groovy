@@ -61,7 +61,21 @@ class JobDaoService {
     /**
      * Returns a map <JobID, JobLabel>
      */
-    Map<Long, String> getJobLabels() {
+    List<Job> getJobLabels() {
+        Job.createCriteria().list {
+            eq('deleted', false)
+            order('label')
+            projections {
+                property('id')
+                property('label')
+            }
+        } as List<Job>
+    }
+
+    /**
+     * Returns a map <JobID, JobLabel>
+     */
+    Map<Long, String> getJobLabelsAsMap() {
         Job.createCriteria().list {
             eq('deleted', false)
             order('label')
